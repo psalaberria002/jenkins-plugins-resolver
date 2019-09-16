@@ -1,0 +1,12 @@
+# github.com/golang/protobuf v1.3.2
+github.com/golang/protobuf/proto
+github.com/golang/protobuf/jsonpb
+github.com/golang/protobuf/ptypes/struct
+# github.com/juamedgod/semver v0.0.0-20170502105953-b4d115fee3e6
+github.com/juamedgod/semver
+# github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d
+github.com/juju/errors
+# github.com/mmikulicic/multierror v0.0.0-20170428094957-c1ad6b5ecd26
+github.com/mmikulicic/multierror
+# go.nami.run/gotools/version v0.0.0-20170621145754-afe50d21077a
+go.nami.run/gotools/version

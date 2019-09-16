@@ -1,0 +1,10 @@
+github.com/golang/protobuf v1.3.2 h1:6nsPYzhq5kReh6QImI3k5qWzO4PEbvbIW2cwSfR/6xs=
+github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/juamedgod/semver v0.0.0-20170502105953-b4d115fee3e6 h1:YFArVZ6PsJsZWrUXfrd4VwasZNC34oDi7aQKBNgFc2E=
+github.com/juamedgod/semver v0.0.0-20170502105953-b4d115fee3e6/go.mod h1:vcHLMrpRUuYU/uaqQY7SUthxQ0u9MCmjQTgXNF264uU=
+github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d h1:hJXjZMxj0SWlMoQkzeZDLi2cmeiWKa7y1B8Rg+qaoEc=
+github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d/go.mod h1:W54LbzXuIE0boCoNJfwqpmkKJ1O4TCTZMetAt6jGk7Q=
+github.com/mmikulicic/multierror v0.0.0-20170428094957-c1ad6b5ecd26 h1:Sk/rGhRF3TAxGR8Ldp3lAUw8GJehJct+5LVU79F13DI=
+github.com/mmikulicic/multierror v0.0.0-20170428094957-c1ad6b5ecd26/go.mod h1:GNJ15ZAuaQsmIEb/VWpp0pn83vYzb6PglASRGNhEPww=
+go.nami.run/gotools/version v0.0.0-20170621145754-afe50d21077a h1:xfxg47bnSmVFXGc3AkTYY+fxzTtmrFXGLgidlW8mmoI=
+go.nami.run/gotools/version v0.0.0-20170621145754-afe50d21077a/go.mod h1:vT0kzTk5Cv2MYFlr4Rf0/Up9o2FxvYvzz+XsTZwp1/0=

@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "expression.go",
+        "hacks.go",
+        "range.go",
+        "semver.go",
+        "utils.go",
+        "version.go",
+    ],
+    importmap = "github.com/bitnami-labs/jenkins-plugins-resolver/vendor/github.com/juamedgod/semver",
+    importpath = "github.com/juamedgod/semver",
+    visibility = ["//visibility:public"],
+)
