@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "downloader.go",
+        "extractor.go",
+        "parser.go",
+        "store.go",
+    ],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jpi",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api:go_default_library",
+        "//pkg/utils:go_default_library",
+        "//pkg/zip:go_default_library",
+        "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/mmikulicic/multierror:go_default_library",
+    ],
+)

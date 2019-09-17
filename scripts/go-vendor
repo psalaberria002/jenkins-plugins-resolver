@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -eux
+
+# Update vendored Go dependencies and rebuild Bazel control files.
+#
+# `go mod vendor` removes and re-adds vendored code. Some vendored dependencies
+# may use Bazel and their Bazel files may conflict with our builds.
+#
+# For convenience, this script vendors Go dependencies and then
+# removes/regenerates any Bazel control files we need. It should be run each
+# time a Go dependency changes.
+
+# enable go modules (even when inside GOPATH)
+export GO111MODULE=on
+
+go mod vendor
+find ./vendor -mindepth 2 \( -name BUILD -or -name BUILD.bazel -or -name WORKSPACE \) -delete
+bazel run //:gazelle

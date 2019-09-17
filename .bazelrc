@@ -1,0 +1,4 @@
+build --javabase=@bazel_tools//tools/jdk:host_jdk
+build --action_env=HOME
+build --workspace_status_command=./tools/mkstamp.sh
+build --host_force_python=PY2

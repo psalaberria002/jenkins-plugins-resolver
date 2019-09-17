@@ -1,0 +1,40 @@
+syntax = "proto3";
+option go_package = "api";
+
+message Plugin {
+  string name = 1;
+  string version = 2;
+}
+
+message PluginMetadata {
+  string full_name = 1;
+  Plugin plugin = 2;
+  repeated Plugin dependencies = 3;
+  repeated Plugin optional_dependencies = 4;
+}
+
+message PluginsRequest {
+  repeated Plugin plugins = 1;
+}
+
+message Graph {
+  message Node {
+    Plugin plugin = 1;
+    repeated Node dependencies = 3;
+  }
+  repeated Node nodes = 1;
+}
+
+message PluginSummary {
+  string name = 1;
+  string version = 2;
+  // The requesters is not intrinsic to the plugin,
+  // but the origin of this plugin in the graph;
+  // ie, because it is a transitive dependency from
+  // other plugin or because it is part of the input
+  repeated string requesters = 3;
+}
+
+message PluginsSummary {
+  repeated PluginSummary plugins = 1;
+}

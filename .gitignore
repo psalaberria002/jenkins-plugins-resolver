@@ -2,5 +2,9 @@
 .jenkins
 .vscode
 
+# Local runs
+plugins.json
+plugins.json.lock
+
 # Bazel directories
 bazel-*

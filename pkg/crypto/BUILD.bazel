@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["crypto.go"],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/crypto",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/juju/errors:go_default_library"],
+)

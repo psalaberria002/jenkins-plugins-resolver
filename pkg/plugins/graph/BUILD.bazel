@@ -1,0 +1,20 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "graph.go",
+        "incompatibilities.go",
+        "store.go",
+    ],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/graph",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api:go_default_library",
+        "//pkg/crypto:go_default_library",
+        "//pkg/plugins/meta:go_default_library",
+        "//pkg/utils:go_default_library",
+        "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/mmikulicic/multierror:go_default_library",
+    ],
+)
