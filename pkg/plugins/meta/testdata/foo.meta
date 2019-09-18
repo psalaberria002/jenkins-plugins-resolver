@@ -1,0 +1,7 @@
+{
+  "fullName": "Foo",
+  "plugin": {
+    "name": "foo",
+    "version": "1.0"
+  }
+}

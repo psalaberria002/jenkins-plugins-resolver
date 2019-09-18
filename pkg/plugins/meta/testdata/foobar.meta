@@ -1,0 +1,13 @@
+{
+  "fullName": "Foo",
+  "plugin": {
+    "name": "foo",
+    "version": "1.0"
+  },
+  "dependencies": [
+    {
+      "name": "bar",
+      "version": "1.0"
+    }
+  ]
+}
