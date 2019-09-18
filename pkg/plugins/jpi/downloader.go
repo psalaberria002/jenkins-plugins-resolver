@@ -13,8 +13,11 @@ import (
 	"github.com/mmikulicic/multierror"
 )
 
-const (
+var (
 	updatesURL = "https://updates.jenkins.io/download"
+)
+
+const (
 	timeoutMin = 2
 )
 
