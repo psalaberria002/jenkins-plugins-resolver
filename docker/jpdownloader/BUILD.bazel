@@ -1,0 +1,29 @@
+load(
+    "@tagged_docker_push//:defaults.bzl",
+    tagged_docker_push = "docker_push",
+)
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+    name = "jenkins-plugins-downloader",
+    base = "@go_debug_image_base//image",
+    embed = ["//cmd/jpdownloader:go_default_library"],
+    goarch = "amd64",
+    goos = "linux",
+    pure = "on",
+)
+
+repository = "bitnami-labs/jenkins-plugins-downloader"
+
+tagged_docker_push(
+    name = "push",
+    image = ":jenkins-plugins-downloader",
+    repository = repository,
+)
+
+tagged_docker_push(
+    name = "push_latest",
+    image = ":jenkins-plugins-downloader",
+    repository = repository,
+    tag = "latest",
+)

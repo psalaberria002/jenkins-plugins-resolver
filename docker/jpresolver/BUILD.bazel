@@ -1,0 +1,29 @@
+load(
+    "@tagged_docker_push//:defaults.bzl",
+    tagged_docker_push = "docker_push",
+)
+load("@io_bazel_rules_docker//go:image.bzl", "go_image")
+
+go_image(
+    name = "jenkins-plugins-resolver",
+    base = "@go_debug_image_base//image",
+    embed = ["//cmd/jpresolver:go_default_library"],
+    goarch = "amd64",
+    goos = "linux",
+    pure = "on",
+)
+
+repository = "bitnami-labs/jenkins-plugins-resolver"
+
+tagged_docker_push(
+    name = "push_tag",
+    image = ":jenkins-plugins-resolver",
+    repository = repository,
+)
+
+tagged_docker_push(
+    name = "push_latest",
+    image = ":jenkins-plugins-resolver",
+    repository = repository,
+    tag = "latest",
+)
