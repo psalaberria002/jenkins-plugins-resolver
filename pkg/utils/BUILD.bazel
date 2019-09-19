@@ -16,9 +16,9 @@ go_test(
     name = "go_default_test",
     srcs = ["utils_test.go"],
     data = glob(["testdata/**"]),
+    embed = [":go_default_library"],
     deps = [
         "//pkg/utils/testdata/example:go_default_library",
         "//vendor/github.com/golang/protobuf/proto:go_default_library",
     ],
-    embed = [":go_default_library"],
 )
