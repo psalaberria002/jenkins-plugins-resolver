@@ -1,3 +1,5 @@
+![](https://github.com/bitnami-labs/jenkins-plugins-resolver/workflows/Continuous%20Integration/badge.svg)
+
 # jenkins-plugins-resolver
 
 Go tools to manage Jenkins plugins resolution, such as transitive dependencies graph computation and download
