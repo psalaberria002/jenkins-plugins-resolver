@@ -2,7 +2,128 @@
 
 # jenkins-plugins-resolver
 
-Go tools to manage Jenkins plugins resolution, such as transitive dependencies graph computation and download
+Go tools to manage Jenkins plugins resolution, such as transitive dependencies graph computation and download.
+
+These tools are thought to be integrated with _configuration-as-code_ Jenkins deployments.
+In this kind of scenario, you may want to have a _"list"_ describing the plugins that your Jenkins project requires. However, if you leave Jenkins to install these plugins, it will install other dependencies that may break your deployment as there are incompatibilities between them or requirements that you will only notice at runtime.
+
+In order to avoid this kind of issues, it makes sense to have an offline tool that, given a list of plugins, it renders a fully-qualified list of plugins so Jenkins will start with no additional operations.
+
+Therefore, we need to tasks here:
+
+1. Compute a fully-qualified list of plugins from a small subset of _"required"_ plugins.
+2. Donwload a list of plugins in the `JENKINS_HOME/plugins` folder.
+
+Ideally, the `JENKINS_HOME/plugins` should be removed any time we modify the list of plugins and restart/re-deploy Jenkins.
+
+
+# Quickstart
+
+According to the tasks we have mentioned we need to perform two tasks.
+
+## Compute a fully-qualified list of plugins from a small subset of them.
+
+The `jpresolver` tool assumes that you have a `plugins.json` file describing the plugins that your Jenkins project requires:
+
+```
+{
+  "plugins": [
+    {
+      "name": "google-login",
+      "version": "1.4"
+    }
+  ]
+}
+```
+
+This tool works in the same that other package manager tools do: It will inspect the `plugins.json` file and will create a `plugins.json.lock` with all the required plugins set. This means that it will resolve transitive dependencies and will warn you if any of the required plugins (in `plugins.json`) is incompatible (older) than one of those transitive dependencies.
+
+We can run this tool using the docker image:
+
+> *NOTE*: Take a look at the ["Running the tools"](#running-the-tools) section if you prefer to run the binaries directly.
+
+```
+$ docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest
+2019/09/19 12:37:31 #10> fetching google-login:1.4 metadata...
+2019/09/19 12:37:34 #10> fetching mailer:1.6 metadata...
+```
+
+After this run, the `plugins.json.lock` has been generated:
+
+```
+{
+  "plugins": [
+    {
+      "name": "google-login",
+      "version": "1.4"
+    },
+    {
+      "name": "mailer",
+      "version": "1.6"
+    }
+  ]
+}
+```
+
+As you can see, the _lock_ file contains an additional dependency.
+
+## Download a list of plugins
+
+This tool is thought to download the plugins described in `plugins.json.lock` to the `JENKINS_HOME/plugins` folder. This process may vary depending on your deployment workflows.
+
+### Kubernetes
+
+If you are using kubernetes, you may use this tool within an init container to download the list of plugins (from a `configmap`, for example) directly to the plugins folder (persisted `volume` mounted with write permissions).
+
+### SingleVMs
+
+If you are using a singlevm, you may use this tool as part of the Jenkins start command/service so it prepares the plugins before Jenkins actually starts.
+
+Independtly to your DevOps, let's assume you are running this tool in the target environment and the `plugins.json.lock` is in your current directory:
+
+```
+$ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-downloader:latest
+2019/09/19 12:57:32 # 4> downloading mailer:1.6...
+2019/09/19 12:57:32 #10> downloading google-login:1.4...
+2019/09/19 12:57:35 done!
+```
+
+> **NOTE**: The `-v $JENKINS_HOME` flag will mount our Jenkins home path in the same location. The `-e JENKINS_HOME` flag will allow the run to autodetect this loation.
+
+## How to find incompatibilities
+
+This feature is intrinsic to the `jpresolver` tool. Example:
+
+```
+$ cat plugins.json
+{
+  "plugins": [
+    {
+      "name": "google-login",
+      "version": "1.4"
+    },
+    {
+      "name": "mailer",
+      "version": "1.1"
+    }
+  ]
+}
+
+$ docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest
+2019/09/16 14:29:53  There were found some incompatibilities:
+2019/09/16 14:29:53   ├── mailer:1.1:
+2019/09/16 14:29:53   │   └── google-login:1.4 > mailer:1.6
+2019/09/16 14:29:53
+2019/09/16 14:29:53  You should bump the version in the input and evaluate the required changes.
+```
+
+## Use cache
+
+If you want to speed up the local resolution process, you can use the `-working-dir` flag to cache the plugins information:
+
+```
+docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest -working-dir /ws/.jenkins
+```
 
 # Development
 
@@ -79,11 +200,11 @@ The working directory can be configured via `-working-dir` flag. This directory 
 
 ### Output
 
-The computed list of plugins will be written in the file specified via `-output` flag. It will follow the same schema that it is expected from the input.
+The computed list of plugins will be written in the file specified via `-output` flag (defaults to the relative `<input>.lock`). It will follow the same schema that it is expected from the input.
 
 ### Input
 
-The list of plugins must be provided via `-input` flag. It must follow the following schema:
+The list of plugins can be provided via `-input` flag (defaults to the relative `plugins.json` file). It must follow the following schema:
 
 ```
 {
@@ -94,122 +215,6 @@ The list of plugins must be provided via `-input` flag. It must follow the follo
         }
     ]
 }
-```
-
-## How to use it
-
-Let's suppose we want to install the `kubernetes` plugin. We need to create a file (ie, _input.json_) with the following content):
-
-```
-{
-    "plugins": [
-        {
-            "name": "kubernetes",
-            "version": "1.18.2",
-        }
-    ]
-}
-```
-
-We can run this tool either locally or using the container image:
-
-```
-$ bazel run //cmd/jpresolver:jpresolver -- -working-dir $PWD/.jenkins -input $PWD/input.json -output $PWD/output.json
-INFO: Analyzed target //cmd/jpresolver:jpresolver (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-Target //cmd/jpresolver:jpresolver up-to-date:
-  bazel-bin/cmd/jpresolver/darwin_amd64_stripped/jpresolver
-INFO: Elapsed time: 0.421s, Critical Path: 0.03s
-INFO: 0 processes.
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/cmd/jpresolver/darwin_amd64_stripped/jpresolver -working-dir REDACTEDPWD/.jenkins -input REDACTEDPWD/input.json -output REDACTEDPWD/output.json
-2019/09/16 12:37:58 #10> fetching kubernetes:1.18.2 metadata...
-...
-INFO: Build completed successfully, 1 total action
-```
-
-```
-$ docker run -v $PWD:/workspace gcr.io/bitnami-labs/jenkins-plugin-resolver -t -- -input /workspace/input.json -output /workspace/output.json
-2019/09/16 12:37:58 #10> fetching kubernetes:1.18.2 metadata...
-...
-```
-
-We will get the following differences:
-
-```
-$ diff -ur input.json output.json
---- input.json	2019-09-16 12:37:43.000000000 +0200
-+++ output.json	2019-09-16 12:37:58.000000000 +0200
-@@ -1,8 +1,68 @@
- {
-   "plugins": [
-     {
-+      "name": "apache-httpcomponents-client-4-api",
-+      "version": "4.5.5-3.0"
-+    },
-+    {
-+      "name": "authentication-tokens",
-+      "version": "1.3"
-+    },
-+    {
-+      "name": "cloudbees-folder",
-+      "version": "6.9"
-+    },
-+    {
-+      "name": "credentials",
-+      "version": "2.2.0"
-+    },
-+    {
-+      "name": "credentials-binding",
-+      "version": "1.12"
-+    },
-+    {
-+      "name": "docker-commons",
-+      "version": "1.14"
-+    },
-+    {
-+      "name": "durable-task",
-+      "version": "1.30"
-+    },
-+    {
-+      "name": "jackson2-api",
-+      "version": "2.9.9"
-+    },
-+    {
-       "name": "kubernetes",
-       "version": "1.18.2"
-+    },
-+    {
-+      "name": "kubernetes-credentials",
-+      "version": "0.4.0"
-+    },
-+    {
-+      "name": "plain-credentials",
-+      "version": "1.5"
-+    },
-+    {
-+      "name": "scm-api",
-+      "version": "2.2.6"
-+    },
-+    {
-+      "name": "structs",
-+      "version": "1.19"
-+    },
-+    {
-+      "name": "variant",
-+      "version": "1.3"
-+    },
-+    {
-+      "name": "workflow-api",
-+      "version": "2.35"
-+    },
-+    {
-+      "name": "workflow-step-api",
-+      "version": "2.20"
-     }
-   ]
--}
-+}
 ```
 
 # jpdownloader
@@ -224,7 +229,7 @@ The working directory can be configured via `-working-dir` flag. This directory 
 
 ### Input
 
-The list of plugins must be provided via `-input` flag. It must follow the following schema:
+The list of plugins can be provided via `-input` flag (defaults to the relative `plugins.json` file). It must follow the following schema:
 
 ```
 {
@@ -237,132 +242,6 @@ The list of plugins must be provided via `-input` flag. It must follow the follo
 }
 ```
 
-## How to use it
-
-Let's suppose we want to install the `kubernetes` plugin. We need to create a file (ie, _input.json_) with the following content):
-
-```
-{
-    "plugins": [
-        {
-            "name": "kubernetes",
-            "version": "1.18.2",
-        }
-    ]
-}
-```
-
-We can resolve the list of dependencies first (`jpresolver`) and then run this tool either locally or using the container image:
-
-```
-$ bazel run //cmd/jpdownloader:jpdownloader -- -working-dir $PWD/.jenkins -input $PWD/input.json
-INFO: Analyzed target //cmd/jpdownloader:jpdownloader (0 packages loaded, 0 targets configured).
-INFO: Found 1 target...
-Target //cmd/jpdownloader:jpdownloader up-to-date:
-  bazel-bin/cmd/jpdownloader/darwin_amd64_stripped/jpdownloader
-INFO: Elapsed time: 0.421s, Critical Path: 0.03s
-INFO: 0 processes.
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/cmd/jpdownloader/darwin_amd64_stripped/jpdownloader -working-dir REDACTEDPWD/.jenkins -input REDACTEDPWD/input.json
-2019/09/16 13:30:59 # 3> downloading credentials:2.2.0...
-2019/09/16 13:30:59 # 7> downloading docker-commons:1.14...
-2019/09/16 13:30:59 # 5> downloading credentials-binding:1.12...
-2019/09/16 13:30:59 # 6> downloading durable-task:1.30...
-2019/09/16 13:30:59 # 4> downloading cloudbees-folder:6.9...
-2019/09/16 13:30:59 # 8> downloading jackson2-api:2.9.9...
-2019/09/16 13:30:59 # 9> downloading kubernetes:1.18.2...
-2019/09/16 13:30:59 #10> downloading kubernetes-credentials:0.4.0...
-2019/09/16 13:30:59 # 2> downloading authentication-tokens:1.3...
-2019/09/16 13:30:59 # 1> downloading apache-httpcomponents-client-4-api:4.5.5-3.0...
-2019/09/16 13:31:01 # 6> downloaded durable-task:1.30.
-2019/09/16 13:31:01 # 6> downloading plain-credentials:1.5...
-2019/09/16 13:31:01 #10> downloaded kubernetes-credentials:0.4.0.
-2019/09/16 13:31:01 #10> downloading scm-api:2.2.6...
-2019/09/16 13:31:01 # 7> downloaded docker-commons:1.14.
-2019/09/16 13:31:01 # 7> downloading structs:1.19...
-2019/09/16 13:31:01 # 2> downloaded authentication-tokens:1.3.
-2019/09/16 13:31:01 # 2> downloading variant:1.3...
-2019/09/16 13:31:01 # 4> downloaded cloudbees-folder:6.9.
-2019/09/16 13:31:01 # 4> downloading workflow-api:2.35...
-2019/09/16 13:31:02 # 6> downloaded plain-credentials:1.5.
-2019/09/16 13:31:02 # 6> downloading workflow-step-api:2.20...
-2019/09/16 13:31:02 # 5> downloaded credentials-binding:1.12.
-2019/09/16 13:31:02 # 2> downloaded variant:1.3.
-2019/09/16 13:31:02 #10> downloaded scm-api:2.2.6.
-2019/09/16 13:31:02 # 7> downloaded structs:1.19.
-2019/09/16 13:31:02 # 4> downloaded workflow-api:2.35.
-2019/09/16 13:31:02 # 6> downloaded workflow-step-api:2.20.
-2019/09/16 13:31:03 # 3> downloaded credentials:2.2.0.
-2019/09/16 13:31:04 # 1> downloaded apache-httpcomponents-client-4-api:4.5.5-3.0.
-2019/09/16 13:31:04 # 8> downloaded jackson2-api:2.9.9.
-2019/09/16 13:31:12 # 9> downloaded kubernetes:1.18.2.
-2019/09/16 13:31:12 done!
-INFO: Build completed successfully, 1 total action
-```
-
-```
-$ docker run -v $PWD:/workspace gcr.io/bitnami-labs/jenkins-plugin-resolver -t -- -input /workspace/input.json -output /workspace/output.json
-2019/09/16 13:30:59 # 3> downloading credentials:2.2.0...
-2019/09/16 13:30:59 # 7> downloading docker-commons:1.14...
-2019/09/16 13:30:59 # 5> downloading credentials-binding:1.12...
-2019/09/16 13:30:59 # 6> downloading durable-task:1.30...
-2019/09/16 13:30:59 # 4> downloading cloudbees-folder:6.9...
-2019/09/16 13:30:59 # 8> downloading jackson2-api:2.9.9...
-2019/09/16 13:30:59 # 9> downloading kubernetes:1.18.2...
-2019/09/16 13:30:59 #10> downloading kubernetes-credentials:0.4.0...
-2019/09/16 13:30:59 # 2> downloading authentication-tokens:1.3...
-2019/09/16 13:30:59 # 1> downloading apache-httpcomponents-client-4-api:4.5.5-3.0...
-2019/09/16 13:31:01 # 6> downloaded durable-task:1.30.
-2019/09/16 13:31:01 # 6> downloading plain-credentials:1.5...
-2019/09/16 13:31:01 #10> downloaded kubernetes-credentials:0.4.0.
-2019/09/16 13:31:01 #10> downloading scm-api:2.2.6...
-2019/09/16 13:31:01 # 7> downloaded docker-commons:1.14.
-2019/09/16 13:31:01 # 7> downloading structs:1.19...
-2019/09/16 13:31:01 # 2> downloaded authentication-tokens:1.3.
-2019/09/16 13:31:01 # 2> downloading variant:1.3...
-2019/09/16 13:31:01 # 4> downloaded cloudbees-folder:6.9.
-2019/09/16 13:31:01 # 4> downloading workflow-api:2.35...
-2019/09/16 13:31:02 # 6> downloaded plain-credentials:1.5.
-2019/09/16 13:31:02 # 6> downloading workflow-step-api:2.20...
-2019/09/16 13:31:02 # 5> downloaded credentials-binding:1.12.
-2019/09/16 13:31:02 # 2> downloaded variant:1.3.
-2019/09/16 13:31:02 #10> downloaded scm-api:2.2.6.
-2019/09/16 13:31:02 # 7> downloaded structs:1.19.
-2019/09/16 13:31:02 # 4> downloaded workflow-api:2.35.
-2019/09/16 13:31:02 # 6> downloaded workflow-step-api:2.20.
-2019/09/16 13:31:03 # 3> downloaded credentials:2.2.0.
-2019/09/16 13:31:04 # 1> downloaded apache-httpcomponents-client-4-api:4.5.5-3.0.
-2019/09/16 13:31:04 # 8> downloaded jackson2-api:2.9.9.
-2019/09/16 13:31:12 # 9> downloaded kubernetes:1.18.2.
-2019/09/16 13:31:12 done!
-```
-
-## How to find incompatibilities
-
-This feature is intrinsic to the `jpresolver` tool. Example:
-
-```
-$ cat testdata/inputs.json
-{
-  "plugins": [
-    {
-      "name": "google-login",
-      "version": "1.4"
-    },
-    {
-      "name": "mailer",
-      "version": "1.1"
-    }
-  ]
-}
-
-$ jpresolver -input testdata/inputs.json
-2019/09/16 14:29:53  There were found some incompatibilities:
-2019/09/16 14:29:53   ├── mailer:1.1:
-2019/09/16 14:29:53   │   └── google-login:1.4 > mailer:1.6
-2019/09/16 14:29:53
-2019/09/16 14:29:53  You should bump the version in the input and evaluate the required changes.
-```
 
 # Working directories
 
