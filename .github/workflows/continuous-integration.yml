@@ -35,6 +35,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@master
+    - name: Docker Login
+      uses: actions/docker/login@master
+      env:
+        DOCKER_PASSWORD: ${{ secrets.GCR_BITNAMI_LABS }}
+        DOCKER_USERNAME: _json_key
+        DOCKER_REGISTRY_URL: https://gcr.io
     - name: Publish targets
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
