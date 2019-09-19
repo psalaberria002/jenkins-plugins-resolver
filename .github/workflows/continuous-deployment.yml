@@ -30,7 +30,7 @@ jobs:
   #       args: bazel test //...
   publish:
     name: Publish
-    needs: [build, test]
+    # needs: [build, test]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
