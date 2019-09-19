@@ -4,7 +4,7 @@
 
 Go tools to manage Jenkins plugins resolution, such as transitive dependencies graph computation and download
 
-# Develpment
+# Development
 
 This project uses the standard [go mod](https://blog.golang.org/using-go-modules) tool to manage and vendor Go dependencies.
 
