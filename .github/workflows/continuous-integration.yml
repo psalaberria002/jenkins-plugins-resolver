@@ -1,0 +1,40 @@
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Build targets
+      uses: docker://l.gcr.io/google/bazel:0.29.1
+      run: |
+        bazel build //...
+  test:
+    needs: [build]
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Test targets
+      uses: docker://l.gcr.io/google/bazel:0.29.1
+      run: |
+        bazel test //...
+  publish:
+    needs: [build, test]
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Publish targets
+      uses: docker://l.gcr.io/google/bazel:0.29.1
+      run: |
+        echo Testing
+
