@@ -31,32 +31,36 @@ var (
 func copyPlugins(plugins *api.PluginsRequest) error {
 	var errs error
 	for _, p := range plugins.Plugins {
-		src := jpi.GetPluginPath(p, *workingDir)
-		r, err := os.Open(src)
-		if err != nil {
-			errs = multierror.Append(errs, errors.Trace(err))
-			continue
-		}
-		defer r.Close()
+		// Use anonymous function to free descriptors in each loop iteration.
+		err := func() error {
+			src := jpi.GetPluginPath(p, *workingDir)
+			r, err := os.Open(src)
+			if err != nil {
+				return errors.Trace(err)
+			}
+			defer r.Close()
 
-		dst := filepath.Join(*outputDir, fmt.Sprintf("%s.jpi.pinned", p.Name))
-		w, err := os.Create(dst)
-		if err != nil {
-			errs = multierror.Append(errs, errors.Trace(err))
-			continue
-		}
-		defer w.Close()
+			dst := filepath.Join(*outputDir, fmt.Sprintf("%s.jpi.pinned", p.Name))
+			w, err := os.Create(dst)
+			if err != nil {
+				return errors.Trace(err)
+			}
+			defer w.Close()
 
-		_, err = io.Copy(w, r)
-		if err != nil {
-			errs = multierror.Append(errs, errors.Trace(err))
-			continue
-		}
+			_, err = io.Copy(w, r)
+			return errors.Trace(err)
+		}()
+		errs = multierror.Append(errs, err)
 	}
 	return errs
 }
 
 func run() error {
+	if err := validateFlags(); err != nil {
+		flag.Usage()
+		return errors.Trace(err)
+	}
+
 	plugins := &api.PluginsRequest{}
 	if err := utils.UnmarshalJSON(*inputFile, plugins); err != nil {
 		return errors.Trace(err)
@@ -69,28 +73,23 @@ func run() error {
 	return copyPlugins(plugins)
 }
 
-func init() {
-	flag.Parse()
+func validateFlags() error {
 	if *inputFile == "" {
-		flag.Usage()
-		log.Fatalf("undefined input file")
+		return errors.Errorf("undefined input file")
 	}
 	if ok, err := utils.FileExists(*outputDir); err != nil {
-		log.Fatalf("%+v", err)
+		return errors.Trace(err)
 	} else if !ok {
-		flag.Usage()
-		log.Fatalf("the output directory does not exist")
-	}
-	// Ensure working paths exist
-	if err := os.MkdirAll(*workingDir, 0777); err != nil {
-		log.Fatalf("%+v", err)
+		return errors.Errorf("the output directory does not exist")
 	}
 	if err := jpi.EnsureStorePathExists(*workingDir); err != nil {
-		log.Fatalf("%+v", err)
+		return errors.Trace(err)
 	}
+	return nil
 }
 
 func main() {
+	flag.Parse()
 	if err := run(); err != nil {
 		log.Fatalf("%+v", err)
 	}
