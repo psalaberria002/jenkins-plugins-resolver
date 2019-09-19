@@ -5,11 +5,12 @@
 #
 set -e
 
-# According to jenkins documentation BUILD_TAG is:
+# According to GitHub documentation GITHUB_ACTOR is:
 #
-# String of jenkins-${JOB_NAME}-${BUILD_NUMBER}.
+# https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
+# The name of the person or app that initiated the workflow. For example, octocat.
 #
-# We default something reasonable in case we run docker_push rules outside jenkins.
-: "${BUILD_TAG:=local-${USER}}"
+# We default something reasonable in case we run docker_push rules outside GitHub.
+: "${GITHUB_ACTOR:=local-${USER}}"
 
-echo IMAGE_TAG "${BUILD_TAG}-$(git rev-parse HEAD)"
+echo IMAGE_TAG "${GITHUB_ACTOR}-$(git rev-parse HEAD)"
