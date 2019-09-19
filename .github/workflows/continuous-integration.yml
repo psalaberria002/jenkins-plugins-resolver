@@ -17,8 +17,8 @@ jobs:
         entrypoint: /bin/bash
         args: bazel build //...
   test:
-    needs: [build]
     name: Test
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -29,8 +29,8 @@ jobs:
         entrypoint: /bin/bash
         args: bazel test //...
   publish:
-    needs: [build, test]
     name: Publish
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -41,9 +41,24 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.GCR_BITNAMI_LABS }}
         DOCKER_USERNAME: _json_key
         DOCKER_REGISTRY_URL: https://gcr.io
-    - name: Publish targets
+    - name: Publish jenkins-plugins-resolver (tag)
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
         entrypoint: /bin/bash
-        args: echo Testing
+        args: bazel //docker/jpresolver:push_tag
+    - name: Publish jenkins-plugins-resolver (latest)
+      uses: docker://l.gcr.io/google/bazel:0.29.1
+      with:
+        entrypoint: /bin/bash
+        args: bazel //docker/jpresolver:push_latest
+    - name: Publish jenkins-plugins-downloader (tag)
+      uses: docker://l.gcr.io/google/bazel:0.29.1
+      with:
+        entrypoint: /bin/bash
+        args: bazel //docker/jpdownloader:push_tag
+    - name: Publish jenkins-plugins-downloader (latest)
+      uses: docker://l.gcr.io/google/bazel:0.29.1
+      with:
+        entrypoint: /bin/bash
+        args: bazel //docker/jpdownloader:push_latest
 
