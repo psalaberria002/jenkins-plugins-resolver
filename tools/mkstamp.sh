@@ -5,12 +5,12 @@
 #
 set -e
 
-# According to GitHub documentation GITHUB_ACTOR is:
-#
-# https://help.github.com/en/articles/virtual-environments-for-github-actions#default-environment-variables
-# The name of the person or app that initiated the workflow. For example, octocat.
+# According to GitHub documentation GITHUB_ are reserved to internal use so we can rely on them
+# to set a proper tag when bazel runs inside GH actions.
 #
 # We default something reasonable in case we run docker_push rules outside GitHub.
-: "${GITHUB_ACTOR:=local-${USER}}"
-
-echo IMAGE_TAG "${GITHUB_ACTOR}-$(git rev-parse HEAD)"
+if [[ -n "$GITHUB_SHA" ]]; then
+    echo IMAGE_TAG "gh-actions-${GITHUB_SHA}"
+else
+    echo IMAGE_TAG "local-$(git rev-parse HEAD)"
+fi
