@@ -1,4 +1,4 @@
-![](https://github.com/bitnami-labs/jenkins-plugins-resolver/workflows/Continuous%20Integration/badge.svg)
+![](https://github.com/bitnami-labs/jenkins-plugins-resolver/workflows/Continuous%20Deployment/badge.svg)
 
 # jenkins-plugins-resolver
 
@@ -40,7 +40,7 @@ This tool works in the same that other package manager tools do: It will inspect
 
 We can run this tool using the docker image:
 
-> *NOTE*: Take a look at the ["Running the tools"](#running-the-tools) section if you prefer to run the binaries directly.
+> **NOTE**: Take a look at the ["Running the tools"](#running-the-tools) section if you prefer to run the binaries directly.
 
 ```
 $ docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest
@@ -75,20 +75,20 @@ This tool is thought to download the plugins described in `plugins.json.lock` to
 
 If you are using kubernetes, you may use this tool within an init container to download the list of plugins (from a `configmap`, for example) directly to the plugins folder (persisted `volume` mounted with write permissions).
 
-### SingleVMs
+### Virtual Machines
 
-If you are using a singlevm, you may use this tool as part of the Jenkins start command/service so it prepares the plugins before Jenkins actually starts.
+If you are using a virtual machine, you may use this tool as part of the Jenkins start command/service so it prepares the plugins before Jenkins actually starts.
 
-Independtly to your DevOps, let's assume you are running this tool in the target environment and the `plugins.json.lock` is in your current directory:
+Independtly to your DevOps, let's assume you are running the docker image in the target environment and the `plugins.json.lock` is in your current directory:
 
 ```
-$ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-downloader:latest
+$ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME:$JENKINS_HOME -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-downloader:latest
 2019/09/19 12:57:32 # 4> downloading mailer:1.6...
 2019/09/19 12:57:32 #10> downloading google-login:1.4...
 2019/09/19 12:57:35 done!
 ```
 
-> **NOTE**: The `-v $JENKINS_HOME` flag will mount our Jenkins home path in the same location. The `-e JENKINS_HOME` flag will allow the run to autodetect this loation.
+> **NOTE**: The `-v $JENKINS_HOME:$JENKINS_HOME` flag will mount our Jenkins home path in the same location of the container. The `-e JENKINS_HOME` flag will allow the tool to auto-discover this location and `-v $PWD:/ws -w /ws` will allow to find the `plugins.json.lock` in the current directory.
 
 ## How to find incompatibilities
 
@@ -227,9 +227,13 @@ This CLI allows to download a list of plugins.
 
 The working directory can be configured via `-working-dir` flag. This directory will be used for different purposes (see #working-directories).
 
+### Output directory
+
+The downloaded list of plugins will be copied to the output directory specified via `-output-dir` flag (defaults to the `JENKINS_HOME/plugins` folder).
+
 ### Input
 
-The list of plugins can be provided via `-input` flag (defaults to the relative `plugins.json` file). It must follow the following schema:
+The list of plugins can be provided via `-input` flag (defaults to the relative `plugins.json.lock` file). It must follow the following schema:
 
 ```
 {
