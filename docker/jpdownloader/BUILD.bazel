@@ -16,7 +16,7 @@ go_image(
 repository = "bitnami-labs/jenkins-plugins-downloader"
 
 tagged_docker_push(
-    name = "push",
+    name = "push_tag",
     image = ":jenkins-plugins-downloader",
     repository = repository,
 )
