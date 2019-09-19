@@ -13,8 +13,9 @@ jobs:
       uses: actions/checkout@master
     - name: Build targets
       uses: docker://l.gcr.io/google/bazel:0.29.1
-      run: |
-        bazel build //...
+      with:
+        entrypoint: /bin/bash
+        args: bazel build //...
   test:
     needs: [build]
     name: Test
@@ -24,8 +25,9 @@ jobs:
       uses: actions/checkout@master
     - name: Test targets
       uses: docker://l.gcr.io/google/bazel:0.29.1
-      run: |
-        bazel test //...
+      with:
+        entrypoint: /bin/bash
+        args: bazel test //...
   publish:
     needs: [build, test]
     name: Publish
@@ -35,6 +37,7 @@ jobs:
       uses: actions/checkout@master
     - name: Publish targets
       uses: docker://l.gcr.io/google/bazel:0.29.1
-      run: |
-        echo Testing
+      with:
+        entrypoint: /bin/bash
+        args: echo Testing
 
