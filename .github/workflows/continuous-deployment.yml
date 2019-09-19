@@ -45,20 +45,20 @@ jobs:
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
         entrypoint: /bin/bash
-        args: bazel //docker/jpresolver:push_tag
+        args: bazel run //docker/jpresolver:push_tag
     - name: Publish jenkins-plugins-resolver (latest)
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
         entrypoint: /bin/bash
-        args: bazel //docker/jpresolver:push_latest
+        args: bazel run //docker/jpresolver:push_latest
     - name: Publish jenkins-plugins-downloader (tag)
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
         entrypoint: /bin/bash
-        args: bazel //docker/jpdownloader:push_tag
+        args: bazel run //docker/jpdownloader:push_tag
     - name: Publish jenkins-plugins-downloader (latest)
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
         entrypoint: /bin/bash
-        args: bazel //docker/jpdownloader:push_latest
+        args: bazel run //docker/jpdownloader:push_latest
 
