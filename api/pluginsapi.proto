@@ -21,6 +21,7 @@ message Graph {
   message Node {
     Plugin plugin = 1;
     repeated Node dependencies = 3;
+    repeated Node optional_dependencies = 4;
   }
   repeated Node nodes = 1;
 }

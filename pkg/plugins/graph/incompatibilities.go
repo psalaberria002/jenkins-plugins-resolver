@@ -61,7 +61,9 @@ func findPluginRequesters(n *api.Graph_Node, p *api.Plugin, r []string, aux []st
 		aux = append(aux, n.Plugin.Identifier())
 	}
 	for _, nd := range n.Dependencies {
-		// auxDep = append(aux)
+		r = findPluginRequesters(nd, p, r, aux)
+	}
+	for _, nd := range n.OptionalDependencies {
 		r = findPluginRequesters(nd, p, r, aux)
 	}
 	return r

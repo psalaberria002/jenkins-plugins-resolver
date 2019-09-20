@@ -33,6 +33,7 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 		Plugin: p,
 	}
 	dependencies := []*api.Graph_Node{}
+	optionalDependencies := []*api.Graph_Node{}
 
 	metaPath := meta.GetMetaPath(p, workingDir)
 	pm, err := meta.ReadMetadata(metaPath)
@@ -47,6 +48,15 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 		dependencies = append(dependencies, nodeDep)
 	}
 	node.Dependencies = dependencies
+
+	for _, dep := range pm.OptionalDependencies {
+		nodeDep, err := NewNode(dep, workingDir)
+		if err != nil {
+			return nil, errors.Trace(err)
+		}
+		optionalDependencies = append(optionalDependencies, nodeDep)
+	}
+	node.OptionalDependencies = optionalDependencies
 
 	return &node, nil
 }
@@ -81,13 +91,13 @@ func FetchGraph(plugins *api.PluginsRequest, inputFile string, workingDir string
 	for _, p := range plugins.Plugins {
 		node, err := NewNode(p, workingDir)
 		if err != nil {
-			errs = multierror.Append(errs, err)
+			errs = multierror.Append(errs, errors.Trace(err))
 			continue
 		}
 		nodes = append(nodes, node)
 	}
 	if errs != nil {
-		return nil, errs
+		return nil, errors.Trace(errs)
 	}
 
 	g := api.Graph{
@@ -116,10 +126,21 @@ func fetch(ctx context.Context, plugins *api.PluginsRequest, workingDir string, 
 			errs = multierror.Append(errs, err)
 			continue
 		}
+
+		// Iterate dependencies
 		depPluginsRequest := api.PluginsRequest{
 			Plugins: pm.Dependencies,
 		}
 		if err := fetch(ctx, &depPluginsRequest, workingDir, maxWorkers); err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+
+		// Iterate optional dependencies
+		optDepPluginsRequest := api.PluginsRequest{
+			Plugins: pm.OptionalDependencies,
+		}
+		if err := fetch(ctx, &optDepPluginsRequest, workingDir, maxWorkers); err != nil {
 			errs = multierror.Append(errs, err)
 			continue
 		}
