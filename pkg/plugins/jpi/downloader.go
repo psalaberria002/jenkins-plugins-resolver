@@ -58,6 +58,7 @@ func FetchPlugin(p *api.Plugin, workingDir string) error {
 	if cached {
 		return nil
 	}
+	log.Printf("> downloading %s plugin...\n", p.Identifier())
 
 	w, err := os.Create(pluginPath)
 	if err != nil {
@@ -75,7 +76,6 @@ func FetchPlugin(p *api.Plugin, workingDir string) error {
 
 func worker(id int, jobs <-chan *downloadRequest, results chan<- error) {
 	for dr := range jobs {
-		log.Printf("#%2d> downloading %s...\n", id, dr.Plugin.Identifier())
 		err := FetchPlugin(dr.Plugin, dr.WorkingDir)
 		results <- err
 	}

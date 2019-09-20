@@ -31,44 +31,43 @@ func Print(pm *api.PluginMetadata) {
 }
 
 // FetchMetadata will fetch the metadata for the requested plugin
-func FetchMetadata(p *api.Plugin, workingDir string) (*api.PluginMetadata, error) {
+func FetchMetadata(p *api.Plugin, workingDir string) error {
 	metaPath := GetMetaPath(p, workingDir)
 	cached, err := utils.FileExists(metaPath)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
 	if cached {
-		return ReadMetadata(metaPath)
+		return nil
 	}
 
+	log.Printf("> fetching %s metadata...\n", p.Identifier())
 	if err := jpi.FetchPlugin(p, workingDir); err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
 	jpiFile := jpi.GetPluginPath(p, workingDir)
 	manifest, err := jpi.ExtractManifest(jpiFile)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
 	pm, err := jpi.ParseManifest(manifest)
 	if err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
 	if err := WriteMetadata(pm, metaPath); err != nil {
-		return nil, errors.Trace(err)
+		return errors.Trace(err)
 	}
 
-	return nil, nil
+	return nil
 }
 
 func worker(id int, jobs <-chan *metadataRequest, results chan<- error) {
 	for mr := range jobs {
-		log.Printf("#%2d> fetching %s metadata...\n", id, mr.Plugin.Identifier())
-		_, err := FetchMetadata(mr.Plugin, mr.WorkingDir)
-		results <- err
+		results <- FetchMetadata(mr.Plugin, mr.WorkingDir)
 	}
 }
 
