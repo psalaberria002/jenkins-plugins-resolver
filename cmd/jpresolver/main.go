@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/jenkinsdownloader"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/graph"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jpi"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/meta"
@@ -140,7 +141,8 @@ func resolveNodeOptionalDependencies(pm pluginsMap, n *api.Graph_Node) error {
 }
 
 func resolve(pr *api.PluginsRequest) (*api.PluginsRequest, error) {
-	g, err := graph.FetchGraph(pr, *inputFile, *workingDir, maxWorkers)
+	downloader := jenkinsdownloader.NewDownloader()
+	g, err := graph.FetchGraph(pr, downloader, *inputFile, *workingDir, maxWorkers)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

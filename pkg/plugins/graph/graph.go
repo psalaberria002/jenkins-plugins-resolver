@@ -6,6 +6,7 @@ import (
 
 	api "github.com/bitnami-labs/jenkins-plugins-resolver/api"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/crypto"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/common"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/meta"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/juju/errors"
@@ -62,7 +63,7 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 }
 
 // FetchGraph computes the graph for a list of plugins or read it from the store
-func FetchGraph(plugins *api.PluginsRequest, inputFile string, workingDir string, maxWorkers int) (*api.Graph, error) {
+func FetchGraph(plugins *api.PluginsRequest, d common.Downloader, inputFile string, workingDir string, maxWorkers int) (*api.Graph, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutMin*time.Minute)
 	defer cancel()
 
@@ -81,7 +82,7 @@ func FetchGraph(plugins *api.PluginsRequest, inputFile string, workingDir string
 		return ReadGraph(graphPath)
 	}
 
-	if err := fetch(ctx, plugins, workingDir, maxWorkers); err != nil {
+	if err := fetch(ctx, plugins, d, workingDir, maxWorkers); err != nil {
 		return nil, errors.Trace(err)
 	}
 
@@ -110,11 +111,11 @@ func FetchGraph(plugins *api.PluginsRequest, inputFile string, workingDir string
 	return &g, nil
 }
 
-func fetch(ctx context.Context, plugins *api.PluginsRequest, workingDir string, maxWorkers int) error {
+func fetch(ctx context.Context, plugins *api.PluginsRequest, d common.Downloader, workingDir string, maxWorkers int) error {
 	var errs error
 
 	// Iterate the provided list of plugins first to fetch the metadata from upstream
-	if err := meta.RunWorkersPoll(plugins, workingDir, maxWorkers); err != nil {
+	if err := meta.RunWorkersPoll(plugins, d, workingDir, maxWorkers); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -131,7 +132,7 @@ func fetch(ctx context.Context, plugins *api.PluginsRequest, workingDir string, 
 		depPluginsRequest := api.PluginsRequest{
 			Plugins: pm.Dependencies,
 		}
-		if err := fetch(ctx, &depPluginsRequest, workingDir, maxWorkers); err != nil {
+		if err := fetch(ctx, &depPluginsRequest, d, workingDir, maxWorkers); err != nil {
 			errs = multierror.Append(errs, err)
 			continue
 		}
@@ -140,7 +141,7 @@ func fetch(ctx context.Context, plugins *api.PluginsRequest, workingDir string, 
 		optDepPluginsRequest := api.PluginsRequest{
 			Plugins: pm.OptionalDependencies,
 		}
-		if err := fetch(ctx, &optDepPluginsRequest, workingDir, maxWorkers); err != nil {
+		if err := fetch(ctx, &optDepPluginsRequest, d, workingDir, maxWorkers); err != nil {
 			errs = multierror.Append(errs, err)
 			continue
 		}

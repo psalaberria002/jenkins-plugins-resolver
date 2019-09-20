@@ -2,14 +2,12 @@ package jpi
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/common"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/juju/errors"
 	"github.com/mmikulicic/multierror"
@@ -20,32 +18,8 @@ const (
 	timeoutMin = 2
 )
 
-// This way we can override the url for testing
-func getDownloadURL(p *api.Plugin) string {
-	return fmt.Sprintf("%s/plugins/%s/%s/%s.hpi", updatesURL, p.Name, p.Version, p.Name)
-}
-
-func download(ctx context.Context, url string, w io.Writer) error {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	resp, err := http.DefaultClient.Do(req.WithContext(ctx))
-	if err != nil {
-		return errors.Trace(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("got status %q", resp.Status)
-	}
-
-	_, err = io.Copy(w, resp.Body)
-	return err
-}
-
 // FetchPlugin will download the requested plugin in the provided path
-func FetchPlugin(p *api.Plugin, workingDir string) error {
+func FetchPlugin(p *api.Plugin, d common.Downloader, workingDir string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutMin*time.Minute)
 	defer cancel()
 
@@ -66,9 +40,8 @@ func FetchPlugin(p *api.Plugin, workingDir string) error {
 	}
 	defer w.Close()
 
-	url := getDownloadURL(p)
-	if err := download(ctx, url, w); err != nil {
-		return errors.Annotatef(err, "unable to download %q", url)
+	if err := d.Download(ctx, p, w); err != nil {
+		return errors.Annotatef(err, "unable to download %q", d.GetDownloadURL(p))
 	}
 
 	return nil
@@ -76,7 +49,7 @@ func FetchPlugin(p *api.Plugin, workingDir string) error {
 
 func worker(id int, jobs <-chan *downloadRequest, results chan<- error) {
 	for dr := range jobs {
-		err := FetchPlugin(dr.Plugin, dr.WorkingDir)
+		err := FetchPlugin(dr.Plugin, dr.Downloader, dr.WorkingDir)
 		results <- err
 	}
 }
@@ -84,17 +57,19 @@ func worker(id int, jobs <-chan *downloadRequest, results chan<- error) {
 type downloadRequest struct {
 	Plugin     *api.Plugin
 	WorkingDir string
+	Downloader common.Downloader
 }
 
-func newDownloadRequest(p *api.Plugin, path string) *downloadRequest {
+func newDownloadRequest(p *api.Plugin, d common.Downloader, path string) *downloadRequest {
 	return &downloadRequest{
+		Downloader: d,
 		Plugin:     p,
 		WorkingDir: path,
 	}
 }
 
 // RunWorkersPoll will start a poll of workers to download the provided plugins list
-func RunWorkersPoll(psr *api.PluginsRequest, workingDir string, maxNumWorkers int) error {
+func RunWorkersPoll(psr *api.PluginsRequest, d common.Downloader, workingDir string, maxNumWorkers int) error {
 	numPlugins := len(psr.Plugins)
 	jobs := make(chan *downloadRequest, numPlugins)
 	results := make(chan error, numPlugins)
@@ -105,7 +80,7 @@ func RunWorkersPoll(psr *api.PluginsRequest, workingDir string, maxNumWorkers in
 	}
 
 	for _, p := range psr.Plugins {
-		jobs <- newDownloadRequest(p, workingDir)
+		jobs <- newDownloadRequest(p, d, workingDir)
 	}
 	close(jobs)
 

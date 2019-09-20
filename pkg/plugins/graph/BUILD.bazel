@@ -12,6 +12,7 @@ go_library(
     deps = [
         "//api:go_default_library",
         "//pkg/crypto:go_default_library",
+        "//pkg/plugins/downloader/common:go_default_library",
         "//pkg/plugins/meta:go_default_library",
         "//pkg/utils:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",

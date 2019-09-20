@@ -4,6 +4,7 @@ import (
 	"log"
 
 	api "github.com/bitnami-labs/jenkins-plugins-resolver/api"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/common"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jpi"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/juju/errors"
@@ -31,7 +32,7 @@ func Print(pm *api.PluginMetadata) {
 }
 
 // FetchMetadata will fetch the metadata for the requested plugin
-func FetchMetadata(p *api.Plugin, workingDir string) error {
+func FetchMetadata(p *api.Plugin, d common.Downloader, workingDir string) error {
 	metaPath := GetMetaPath(p, workingDir)
 	cached, err := utils.FileExists(metaPath)
 	if err != nil {
@@ -43,7 +44,7 @@ func FetchMetadata(p *api.Plugin, workingDir string) error {
 	}
 
 	log.Printf("> fetching %s metadata...\n", p.Identifier())
-	if err := jpi.FetchPlugin(p, workingDir); err != nil {
+	if err := jpi.FetchPlugin(p, d, workingDir); err != nil {
 		return errors.Trace(err)
 	}
 
@@ -67,24 +68,26 @@ func FetchMetadata(p *api.Plugin, workingDir string) error {
 
 func worker(id int, jobs <-chan *metadataRequest, results chan<- error) {
 	for mr := range jobs {
-		results <- FetchMetadata(mr.Plugin, mr.WorkingDir)
+		results <- FetchMetadata(mr.Plugin, mr.Downloader, mr.WorkingDir)
 	}
 }
 
 type metadataRequest struct {
 	Plugin     *api.Plugin
 	WorkingDir string
+	Downloader common.Downloader
 }
 
-func newMetadataRequest(p *api.Plugin, path string) *metadataRequest {
+func newMetadataRequest(p *api.Plugin, d common.Downloader, path string) *metadataRequest {
 	return &metadataRequest{
+		Downloader: d,
 		Plugin:     p,
 		WorkingDir: path,
 	}
 }
 
 // RunWorkersPoll will start a poll of workers to generate the metadata for the provided plugins list
-func RunWorkersPoll(psr *api.PluginsRequest, workingDir string, maxNumWorkers int) error {
+func RunWorkersPoll(psr *api.PluginsRequest, d common.Downloader, workingDir string, maxNumWorkers int) error {
 	numPlugins := len(psr.Plugins)
 	jobs := make(chan *metadataRequest, numPlugins)
 	results := make(chan error, numPlugins)
@@ -95,7 +98,7 @@ func RunWorkersPoll(psr *api.PluginsRequest, workingDir string, maxNumWorkers in
 	}
 
 	for _, p := range psr.Plugins {
-		jobs <- newMetadataRequest(p, workingDir)
+		jobs <- newMetadataRequest(p, d, workingDir)
 	}
 	close(jobs)
 

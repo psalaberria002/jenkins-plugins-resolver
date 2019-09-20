@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/jenkinsdownloader"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jpi"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/juju/errors"
@@ -66,7 +67,8 @@ func run() error {
 		return errors.Trace(err)
 	}
 
-	if err := jpi.RunWorkersPoll(plugins, *workingDir, maxWorkers); err != nil {
+	downloader := jenkinsdownloader.NewDownloader()
+	if err := jpi.RunWorkersPoll(plugins, downloader, *workingDir, maxWorkers); err != nil {
 		return errors.Trace(err)
 	}
 

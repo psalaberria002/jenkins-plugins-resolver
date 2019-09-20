@@ -12,6 +12,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//api:go_default_library",
+        "//pkg/plugins/downloader/common:go_default_library",
         "//pkg/utils:go_default_library",
         "//pkg/zip:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",

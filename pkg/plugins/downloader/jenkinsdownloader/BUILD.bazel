@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["downloader.go"],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/jenkinsdownloader",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api:go_default_library",
+        "//pkg/plugins/downloader/httpdownloader:go_default_library",
+    ],
+)
