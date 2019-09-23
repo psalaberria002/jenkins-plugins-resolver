@@ -47,8 +47,13 @@ func resolve(pr *api.PluginsRegistry) (*api.PluginsRegistry, error) {
 		return nil, errors.Trace(err)
 	}
 
-	if err := graph.FindIncompatibilities(pr, lock, g); err != nil {
+	incs, err := graph.FindIncompatibilities(pr, lock, g)
+	if err != nil {
 		return nil, errors.Trace(err)
+	}
+	if len(incs) > 0 {
+		log.Printf(" There were found some incompatibilities:\n")
+		incs.PrintIncompatibilities()
 	}
 
 	return lock, nil
