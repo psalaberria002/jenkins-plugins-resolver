@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "graph.go",
         "incompatibilities.go",
+        "locker.go",
         "store.go",
     ],
     importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/graph",

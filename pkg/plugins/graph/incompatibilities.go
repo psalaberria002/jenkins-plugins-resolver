@@ -9,21 +9,22 @@ import (
 	"github.com/mmikulicic/multierror"
 )
 
-// FindIncompatibilities walks through a graph if there are missmatches between two list of plugins requests
-func FindIncompatibilities(g *api.Graph, ipr *api.PluginsRegistry, opr *api.PluginsRegistry) error {
+// FindIncompatibilities walks through a graph if there are missmatches between a plugin registry and its
+// locked version
+func FindIncompatibilities(pr *api.PluginsRegistry, lock *api.PluginsRegistry, g *api.Graph) error {
 	var errs error
 	var found bool
 	incompatibilities := make(map[string][]string)
-	for _, ip := range ipr.Plugins {
+	for _, ip := range pr.Plugins {
 		var p *api.Plugin
-		for _, op := range opr.Plugins {
+		for _, op := range lock.Plugins {
 			if ip.Name == op.Name {
 				p = op
 				break
 			}
 		}
 		if p == nil {
-			errs = multierror.Append(errs, errors.Errorf("unable to find %s in the output plugins request", ip.Identifier()))
+			errs = multierror.Append(errs, errors.Errorf("unable to find %s in the locked file", ip.Identifier()))
 		}
 		if ip.Version != p.Version {
 			found = true

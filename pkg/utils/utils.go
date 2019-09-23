@@ -6,6 +6,7 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/juju/errors"
+	"go.nami.run/gotools/version"
 )
 
 // FileExists will test if a file exists
@@ -40,4 +41,23 @@ func MarshalJSON(filename string, pb proto.Message) error {
 
 	m := &jsonpb.Marshaler{Indent: "  "}
 	return m.Marshal(f, pb)
+}
+
+// VersionLower returns whether i version is lower than j version
+func VersionLower(i string, j string) (bool, error) {
+	vj, err := version.New(j)
+	if err != nil {
+		return false, errors.Errorf("Error parsing version %s: %s", j, err)
+	}
+
+	if i == "" && j != "" {
+		return true, nil
+	}
+
+	vi, err := version.New(i)
+	if err != nil {
+		return false, errors.Errorf("Error parsing version %s: %s", i, err)
+	}
+
+	return vi.Less(vj), nil
 }
