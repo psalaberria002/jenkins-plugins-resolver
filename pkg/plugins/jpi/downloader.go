@@ -72,7 +72,7 @@ func newDownloadRequest(p *api.Plugin, d common.Downloader, path string) *downlo
 }
 
 // RunWorkersPoll will start a poll of workers to download the provided plugins list
-func RunWorkersPoll(psr *api.PluginsRequest, d common.Downloader, workingDir string, maxNumWorkers int) error {
+func RunWorkersPoll(psr *api.PluginsRegistry, d common.Downloader, workingDir string, maxNumWorkers int) error {
 	numPlugins := len(psr.Plugins)
 	jobs := make(chan *downloadRequest, numPlugins)
 	results := make(chan error, numPlugins)

@@ -102,14 +102,14 @@ func TestRunWorkersPoll(t *testing.T) {
 	maxWorkers := 2
 
 	testCases := []struct {
-		plugins   *api.PluginsRequest
+		plugins   *api.PluginsRegistry
 		shouldEnd bool
 	}{
-		{&api.PluginsRequest{Plugins: []*api.Plugin{
+		{&api.PluginsRegistry{Plugins: []*api.Plugin{
 			&api.Plugin{Name: "credentials", Version: "2.2.0"},
 			&api.Plugin{Name: "structs", Version: "1.7"},
 		}}, true},
-		{&api.PluginsRequest{Plugins: []*api.Plugin{
+		{&api.PluginsRegistry{Plugins: []*api.Plugin{
 			&api.Plugin{Name: "credentials", Version: "2.2.0"},
 			&api.Plugin{Name: "structs", Version: "1.7"},
 			&api.Plugin{Name: "foo", Version: "1.0"},

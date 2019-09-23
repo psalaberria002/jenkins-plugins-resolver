@@ -61,8 +61,8 @@ func updatePluginsMap(pm pluginsMap, p *api.Plugin) error {
 	return nil
 }
 
-// NewPluginsRequest iterates a map of plugins and cretes a new plugins request
-func NewPluginsRequest(pm pluginsMap) *api.PluginsRequest {
+// NewPluginsRegistry iterates a map of plugins and cretes a new plugins request
+func NewPluginsRegistry(pm pluginsMap) *api.PluginsRegistry {
 	names := make([]string, 0, len(pm))
 	for name := range pm {
 		names = append(names, name)
@@ -77,7 +77,7 @@ func NewPluginsRequest(pm pluginsMap) *api.PluginsRequest {
 		}
 		plugins = append(plugins, &p)
 	}
-	return &api.PluginsRequest{
+	return &api.PluginsRegistry{
 		Plugins: plugins,
 	}
 }
@@ -140,7 +140,7 @@ func resolveNodeOptionalDependencies(pm pluginsMap, n *api.Graph_Node) error {
 	return nil
 }
 
-func resolve(pr *api.PluginsRequest) (*api.PluginsRequest, error) {
+func resolve(pr *api.PluginsRegistry) (*api.PluginsRegistry, error) {
 	downloader := jenkinsdownloader.NewDownloader()
 	g, err := graph.FetchGraph(pr, downloader, *inputFile, *workingDir, maxWorkers)
 	if err != nil {
@@ -176,7 +176,7 @@ func resolve(pr *api.PluginsRequest) (*api.PluginsRequest, error) {
 		return nil, errors.Trace(errs)
 	}
 
-	npr, err := NewPluginsRequest(pluginsMap), nil
+	npr, err := NewPluginsRegistry(pluginsMap), nil
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -189,7 +189,7 @@ func resolve(pr *api.PluginsRequest) (*api.PluginsRequest, error) {
 }
 
 func run() error {
-	plugins := &api.PluginsRequest{}
+	plugins := &api.PluginsRegistry{}
 	if err := utils.UnmarshalJSON(*inputFile, plugins); err != nil {
 		return errors.Trace(err)
 	}

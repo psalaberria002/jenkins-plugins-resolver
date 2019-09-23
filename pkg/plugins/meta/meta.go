@@ -87,7 +87,7 @@ func newMetadataRequest(p *api.Plugin, d common.Downloader, path string) *metada
 }
 
 // RunWorkersPoll will start a poll of workers to generate the metadata for the provided plugins list
-func RunWorkersPoll(psr *api.PluginsRequest, d common.Downloader, workingDir string, maxNumWorkers int) error {
+func RunWorkersPoll(psr *api.PluginsRegistry, d common.Downloader, workingDir string, maxNumWorkers int) error {
 	numPlugins := len(psr.Plugins)
 	jobs := make(chan *metadataRequest, numPlugins)
 	results := make(chan error, numPlugins)

@@ -29,7 +29,7 @@ var (
 // This function will copy the downloaded plugins (from the working directory
 // used to as fs cache) to the output directory. It will rename them to match
 // the jenkins requirements (.pinned suffix and no version in the filename).
-func copyPlugins(plugins *api.PluginsRequest) error {
+func copyPlugins(plugins *api.PluginsRegistry) error {
 	var errs error
 	for _, p := range plugins.Plugins {
 		// Use anonymous function to free descriptors in each loop iteration.
@@ -62,7 +62,7 @@ func run() error {
 		return errors.Trace(err)
 	}
 
-	plugins := &api.PluginsRequest{}
+	plugins := &api.PluginsRegistry{}
 	if err := utils.UnmarshalJSON(*inputFile, plugins); err != nil {
 		return errors.Trace(err)
 	}

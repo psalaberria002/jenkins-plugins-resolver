@@ -10,7 +10,7 @@ import (
 )
 
 // FindIncompatibilities walks through a graph if there are missmatches between two list of plugins requests
-func FindIncompatibilities(g *api.Graph, ipr *api.PluginsRequest, opr *api.PluginsRequest) error {
+func FindIncompatibilities(g *api.Graph, ipr *api.PluginsRegistry, opr *api.PluginsRegistry) error {
 	var errs error
 	var found bool
 	incompatibilities := make(map[string][]string)
