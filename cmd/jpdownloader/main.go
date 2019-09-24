@@ -28,7 +28,7 @@ var (
 
 // This function will copy the downloaded plugins (from the working directory
 // used to as fs cache) to the output directory. It will rename them to match
-// the jenkins requirements (.pinned suffix and no version in the filename).
+// the jenkins requirements (no version in the filename).
 func copyPlugins(plugins *api.PluginsRegistry) error {
 	var errs error
 	for _, p := range plugins.Plugins {
@@ -41,7 +41,7 @@ func copyPlugins(plugins *api.PluginsRegistry) error {
 			}
 			defer r.Close()
 
-			dst := filepath.Join(*outputDir, fmt.Sprintf("%s.jpi.pinned", p.Name))
+			dst := filepath.Join(*outputDir, fmt.Sprintf("%s.jpi", p.Name))
 			w, err := os.Create(dst)
 			if err != nil {
 				return errors.Trace(err)
