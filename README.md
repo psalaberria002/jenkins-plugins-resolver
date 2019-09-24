@@ -23,16 +23,13 @@ According to the tasks we have mentioned we need to perform two tasks.
 
 ## Compute a fully-qualified list of plugins from a small subset of them.
 
-The `jpresolver` tool assumes that you have a `plugins.json` file describing the plugins that your Jenkins project requires:
+The `jpresolver` tool assumes that you have a `plugins.json` file describing the plugins that your Jenkins project depends on:
 
 ```
 {
-  "plugins": [
-    {
-      "name": "google-login",
-      "version": "1.4"
-    }
-  ]
+  "dependencies": {
+    "google-login": "1.4"
+  }
 }
 ```
 
@@ -97,24 +94,17 @@ This feature is intrinsic to the `jpresolver` tool. Example:
 ```
 $ cat plugins.json
 {
-  "plugins": [
-    {
-      "name": "google-login",
-      "version": "1.4"
-    },
-    {
-      "name": "mailer",
-      "version": "1.1"
-    }
-  ]
+  "dependencies": {
+    "google-login": "1.4",
+    "mailer": "1.1"
+  }
 }
 
 $ docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest
-2019/09/16 14:29:53  There were found some incompatibilities:
-2019/09/16 14:29:53   ├── mailer:1.1:
-2019/09/16 14:29:53   │   └── google-login:1.4 > mailer:1.6
-2019/09/16 14:29:53
-2019/09/16 14:29:53  You should bump the version in the input and evaluate the required changes.
+2019/09/24 17:03:51 > fetching google-login:1.4 metadata...
+2019/09/24 17:03:51  There were found some incompatibilities:
+2019/09/24 17:03:51   ├── mailer:1.1 (a newer version was locked: mailer:1.6):
+2019/09/24 17:03:51   │   └── google-login:1.4 > mailer:1.6
 ```
 
 ## Use cache
@@ -188,7 +178,7 @@ bazel run //cmd/jpdownloader:jpdownloader -- -h
 
 # jpresolver
 
-This CLI allows to resolve transitive plugins dependencies from a list of plugins.
+This CLI allows to resolve transitive plugins dependencies from a project file.
 
 > **NOTE**: If there are incompatibilities between input and the computed output the tool will warn about it to fix it.
 
@@ -204,16 +194,13 @@ The computed list of plugins will be written in the file specified via `-output`
 
 ### Input
 
-The list of plugins can be provided via `-input` flag (defaults to the relative `plugins.json` file). It must follow the following schema:
+The project settings and plugins dependencies can be provided via `-input` flag (defaults to the relative `plugins.json` file). It must follow the following schema:
 
 ```
 {
-    "plugins": [
-        {
-            "name": "kubernetes",
-            "version": "1.18.2",
-        }
-    ]
+  "dependencies": {
+    "google-login": "1.4"
+  }
 }
 ```
 

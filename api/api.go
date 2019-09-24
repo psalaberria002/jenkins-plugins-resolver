@@ -14,3 +14,18 @@ func (p *Plugin) Filename() string {
 func (p *Plugin) Identifier() string {
 	return fmt.Sprintf("%s:%s", p.Name, p.Version)
 }
+
+// GetPluginsRegistry returns a PluginsRegistry structure from
+// a Project one.
+func (p *Project) GetPluginsRegistry() *PluginsRegistry {
+	plugins := []*Plugin{}
+	for name, version := range p.Dependencies {
+		plugins = append(plugins, &Plugin{
+			Name:    name,
+			Version: version,
+		})
+	}
+	return &PluginsRegistry{
+		Plugins: plugins,
+	}
+}

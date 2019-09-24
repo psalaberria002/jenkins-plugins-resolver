@@ -60,10 +60,11 @@ func resolve(pr *api.PluginsRegistry) (*api.PluginsRegistry, error) {
 }
 
 func run() error {
-	plugins := &api.PluginsRegistry{}
-	if err := utils.UnmarshalJSON(*inputFile, plugins); err != nil {
+	project := &api.Project{}
+	if err := utils.UnmarshalJSON(*inputFile, project); err != nil {
 		return errors.Trace(err)
 	}
+	plugins := project.GetPluginsRegistry()
 
 	pr, err := resolve(plugins)
 	if err != nil {

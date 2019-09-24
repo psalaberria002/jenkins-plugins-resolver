@@ -25,3 +25,9 @@ message Graph {
   }
   repeated Node nodes = 1;
 }
+
+// Project represents a file that lists the packages
+// your project depends on
+message Project {
+  map<string,string> dependencies = 1;
+}
