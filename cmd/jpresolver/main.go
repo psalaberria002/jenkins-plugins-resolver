@@ -60,6 +60,11 @@ func resolve(pr *api.PluginsRegistry) (*api.PluginsRegistry, error) {
 }
 
 func run() error {
+	if err := validateFlags(); err != nil {
+		flag.Usage()
+		return errors.Trace(err)
+	}
+
 	project := &api.Project{}
 	if err := utils.UnmarshalJSON(*inputFile, project); err != nil {
 		return errors.Trace(err)
@@ -78,35 +83,31 @@ func run() error {
 	return nil
 }
 
-func init() {
-	flag.Parse()
+func validateFlags() error {
 	if ok, err := utils.FileExists(*inputFile); err != nil {
-		flag.Usage()
-		log.Fatalf("%+v", err)
+		return errors.Trace(err)
 	} else if !ok {
-		flag.Usage()
-		log.Fatalf("%s does not exist", *inputFile)
+		return errors.Errorf("%s does not exist", *inputFile)
 	}
 	if *outputFile == "" {
 		*outputFile = *inputFile + ".lock"
 	}
 
 	// Ensure working paths exist
-	if err := os.MkdirAll(*workingDir, 0777); err != nil {
-		log.Fatalf("%+v", err)
-	}
 	if err := graph.EnsureStorePathExists(*workingDir); err != nil {
-		log.Fatalf("%+v", err)
+		return errors.Trace(err)
 	}
 	if err := jpi.EnsureStorePathExists(*workingDir); err != nil {
-		log.Fatalf("%+v", err)
+		return errors.Trace(err)
 	}
 	if err := meta.EnsureStorePathExists(*workingDir); err != nil {
-		log.Fatalf("%+v", err)
+		return errors.Trace(err)
 	}
+	return nil
 }
 
 func main() {
+	flag.Parse()
 	if err := run(); err != nil {
 		log.Fatalf("%+v", err)
 	}
