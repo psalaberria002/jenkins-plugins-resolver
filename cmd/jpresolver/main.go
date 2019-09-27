@@ -13,6 +13,7 @@ import (
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/meta"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"github.com/juju/errors"
 )
 
@@ -22,7 +23,7 @@ const (
 
 var (
 	workingDir = flag.String("working-dir", filepath.Join(os.Getenv("HOME"), ".jenkins"), "plugins working dir")
-	inputFile  = flag.String("input", "plugins.json", "input file.")
+	inputFile  = flag.String("input", "plugins.json", "input file (.json, .jsonnet. .yaml or .yml)")
 	outputFile = flag.String("output", "", "output file. If not provided, it will default to <input>.lock")
 	optional   = flag.Bool("optional", false, "add optional dependencies to the output. It will allow plugins to run with all the expected features.")
 	showGraph  = flag.Bool("show-graph", false, "show whole dependencies graph in JSON")
@@ -59,14 +60,34 @@ func resolve(pr *api.PluginsRegistry) (*api.PluginsRegistry, error) {
 	return lock, nil
 }
 
+func readInput() (*api.Project, error) {
+	var unmarshal func(string, proto.Message) error
+	switch filepath.Ext(*inputFile) {
+	case ".json":
+		unmarshal = utils.UnmarshalJSON
+	case ".jsonnet":
+		unmarshal = utils.UnmarshalJsonnet
+	case ".yaml", ".yml":
+		unmarshal = utils.UnmarshalYAML
+	}
+	if unmarshal == nil {
+		return nil, errors.Errorf("unsupported input file type: %s\n", *inputFile)
+	}
+	project := &api.Project{}
+	if err := unmarshal(*inputFile, project); err != nil {
+		return nil, errors.Trace(err)
+	}
+	return project, nil
+}
+
 func run() error {
 	if err := validateFlags(); err != nil {
 		flag.Usage()
 		return errors.Trace(err)
 	}
 
-	project := &api.Project{}
-	if err := utils.UnmarshalJSON(*inputFile, project); err != nil {
+	project, err := readInput()
+	if err != nil {
 		return errors.Trace(err)
 	}
 	plugins := project.GetPluginsRegistry()

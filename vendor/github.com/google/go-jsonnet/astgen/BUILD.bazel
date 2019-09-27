@@ -1,0 +1,10 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["stdast.go"],
+    importmap = "github.com/bitnami-labs/jenkins-plugins-resolver/vendor/github.com/google/go-jsonnet/astgen",
+    importpath = "github.com/google/go-jsonnet/astgen",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/google/go-jsonnet/ast:go_default_library"],
+)

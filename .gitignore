@@ -3,8 +3,9 @@
 .vscode
 
 # Local runs
-plugins.json
-plugins.json.lock
+plugins.json*
+plugins.yml*
+plugins.yaml*
 
 # Bazel directories
 bazel-*

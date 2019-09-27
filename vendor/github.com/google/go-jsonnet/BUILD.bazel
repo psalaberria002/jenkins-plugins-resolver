@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "builtins.go",
+        "doc.go",
+        "error_formatter.go",
+        "imports.go",
+        "interpreter.go",
+        "runtime_error.go",
+        "thunks.go",
+        "value.go",
+        "vm.go",
+    ],
+    importmap = "github.com/bitnami-labs/jenkins-plugins-resolver/vendor/github.com/google/go-jsonnet",
+    importpath = "github.com/google/go-jsonnet",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/google/go-jsonnet/ast:go_default_library",
+        "//vendor/github.com/google/go-jsonnet/astgen:go_default_library",
+        "//vendor/github.com/google/go-jsonnet/internal/errors:go_default_library",
+        "//vendor/github.com/google/go-jsonnet/internal/program:go_default_library",
+    ],
+)

@@ -23,17 +23,33 @@ According to the tasks we have mentioned we need to perform two tasks.
 
 ## Compute a fully-qualified list of plugins from a small subset of them.
 
-The `jpresolver` tool assumes that you have a `plugins.json` file describing the plugins that your Jenkins project depends on:
+The `jpresolver` tool assumes that you have a [**project file**](#project-file) file describing the plugins that your Jenkins project depends on:
 
 ```
+# JSON
 {
   "dependencies": {
     "google-login": "1.4"
   }
 }
+
+
+# YAML
+dependencies:
+  google-login: 1.4
+
+
+# Jsonnet
+local auth_deps = {
+    'google-login': '1.4',
+};
+
+{
+    dependencies: auth_deps,
+}
 ```
 
-This tool works in the same that other package manager tools do: It will inspect the `plugins.json` file and will create a `plugins.json.lock` with all the required plugins set. This means that it will resolve transitive dependencies and will warn you if any of the required plugins (in `plugins.json`) is incompatible (older) than one of those transitive dependencies.
+This tool works in the same that other package manager tools do: It will inspect the [**project file**](#project-file) and will create a [**lock file**](#lock-file) with all the required plugins set. This means that it will resolve transitive dependencies and will warn you if any of the project dependencies is incompatible (older) than one of those transitive dependencies.
 
 We can run this tool using the docker image:
 
@@ -45,7 +61,7 @@ $ docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolve
 2019/09/19 12:37:34 > fetching mailer:1.6 metadata...
 ```
 
-After this run, the `plugins.json.lock` has been generated:
+After this run, the lock file has been generated:
 
 ```
 {
@@ -62,11 +78,11 @@ After this run, the `plugins.json.lock` has been generated:
 }
 ```
 
-As you can see, the _lock_ file contains an additional dependency.
+As you can see, the lock file contains an additional dependency.
 
 ## Download a list of plugins
 
-This tool is thought to download the plugins described in `plugins.json.lock` to the `JENKINS_HOME/plugins` folder. This process may vary depending on your deployment workflows.
+This tool is thought to download the plugins described in the lock file to the `JENKINS_HOME/plugins` folder. This process may vary depending on your deployment workflows.
 
 ### Kubernetes
 
@@ -76,7 +92,7 @@ If you are using kubernetes, you may use this tool within an init container to d
 
 If you are using a virtual machine, you may use this tool as part of the Jenkins start command/service so it prepares the plugins before Jenkins actually starts.
 
-Independtly to your DevOps, let's assume you are running the docker image in the target environment and the `plugins.json.lock` is in your current directory:
+Independtly to your DevOps, let's assume you are running the docker image in the target environment and the lock file is in your current directory:
 
 ```
 $ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME:$JENKINS_HOME -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-downloader:latest
@@ -85,21 +101,20 @@ $ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME:$JENKINS_HOME -v $PWD:/ws -w 
 2019/09/19 12:57:35 done!
 ```
 
-> **NOTE**: The `-v $JENKINS_HOME:$JENKINS_HOME` flag will mount our Jenkins home path in the same location of the container. The `-e JENKINS_HOME` flag will allow the tool to auto-discover this location and `-v $PWD:/ws -w /ws` will allow to find the `plugins.json.lock` in the current directory.
+> **NOTE**: The `-v $JENKINS_HOME:$JENKINS_HOME` flag will mount our Jenkins home path in the same location of the container. The `-e JENKINS_HOME` flag will allow the tool to auto-discover this location and `-v $PWD:/ws -w /ws` will allow to find the lock file in the current directory.
 
 ## How to find incompatibilities
 
 This feature is intrinsic to the `jpresolver` tool. Example:
 
+```yml
+dependencies:
+  google-login: 1.4
+  # mailer will force an incompatibility as google-login requires mailer:1.6
+  mailer: 1.1
 ```
-$ cat plugins.json
-{
-  "dependencies": {
-    "google-login": "1.4",
-    "mailer": "1.1"
-  }
-}
 
+```
 $ docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest
 2019/09/24 17:03:51 > fetching google-login:1.4 metadata...
 2019/09/24 17:03:51  There were found some incompatibilities:
@@ -188,11 +203,11 @@ This CLI allows to resolve transitive plugins dependencies from a project file.
 
 The working directory can be configured via `-working-dir` flag. This directory will be used for different purposes (see #working-directories).
 
-### Output
+### Lock file
 
 The computed list of plugins will be written in the file specified via `-output` flag (defaults to the relative `<input>.lock`). It will follow the same schema that it is expected from the input.
 
-### Input
+### Project file
 
 The project settings and plugins dependencies can be provided via `-input` flag (defaults to the relative `plugins.json` file). It must follow the following schema:
 
@@ -203,6 +218,8 @@ The project settings and plugins dependencies can be provided via `-input` flag 
   }
 }
 ```
+
+> **NOTE**: You can use YAML and Jsonnet formats too.
 
 # jpdownloader
 
@@ -218,7 +235,7 @@ The working directory can be configured via `-working-dir` flag. This directory 
 
 The downloaded list of plugins will be copied to the output directory specified via `-output-dir` flag (defaults to the `JENKINS_HOME/plugins` folder).
 
-### Input
+### Lock file
 
 The list of plugins can be provided via `-input` flag (defaults to the relative `plugins.json.lock` file). It must follow the following schema:
 

@@ -1,10 +1,15 @@
 package utils
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
+
+	"github.com/ghodss/yaml"
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	jsonnet "github.com/google/go-jsonnet"
 	"github.com/juju/errors"
 	"go.nami.run/gotools/version"
 )
@@ -31,7 +36,38 @@ func UnmarshalJSON(filename string, pb proto.Message) error {
 	return jsonpb.Unmarshal(r, pb)
 }
 
-// MarshalJSON marshals a protocol buffer into a JSON file.
+// UnmarshalJsonnet unmarshals a JSON file into a protocol buffer
+func UnmarshalJsonnet(filename string, pb proto.Message) error {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	json, err := jsonnet.MakeVM().EvaluateSnippet(filename, string(data))
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return jsonpb.UnmarshalString(json, pb)
+}
+
+// UnmarshalYAML unmarshals a YAML file into a protocol buffer
+func UnmarshalYAML(filename string, pb proto.Message) error {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	// protobuf does not support YAML yet so we are transforming
+	// the YAML bits to JSON in order to unmarshal with jsonpb
+	if err := yaml.Unmarshal(data, pb); err != nil {
+		return errors.Trace(err)
+	}
+	jsb, err := json.Marshal(pb)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	return jsonpb.UnmarshalString(string(jsb), pb)
+}
+
+// MarshalJSON marshals a protocol buffer into a JSON filpb.
 func MarshalJSON(filename string, pb proto.Message) error {
 	f, err := os.Create(filename)
 	if err != nil {

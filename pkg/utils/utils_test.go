@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils/testdata/example"
@@ -32,16 +33,32 @@ func TestFileExists(t *testing.T) {
 func TestUnmarshalJSON(t *testing.T) {
 	testCases := []struct {
 		file string
-		msg  proto.Message
 		want string
 	}{
-		{"testdata/unmarshal.json", &example.Test{}, proto.MarshalTextString(&example.Test{Foo: 123, Bar: "string"})},
+		{"testdata/unmarshal.json", proto.MarshalTextString(&example.Test{Foo: 123, Bar: "string"})},
+		{"testdata/unmarshal.yml", proto.MarshalTextString(&example.Test{Foo: 123, Bar: "string"})},
+		{"testdata/unmarshal.jsonnet", proto.MarshalTextString(&example.Test{Foo: 123, Bar: "string"})},
 	}
 	for _, tc := range testCases {
-		if err := UnmarshalJSON(tc.file, tc.msg); err != nil {
-			t.Fatalf("%+v\n", err)
+		msg := &example.Test{}
+		switch filepath.Ext(tc.file) {
+		case ".json":
+			if err := UnmarshalJSON(tc.file, msg); err != nil {
+				t.Fatalf("%+v\n", err)
+			}
+		case ".jsonnet":
+			if err := UnmarshalJsonnet(tc.file, msg); err != nil {
+				t.Fatalf("%+v\n", err)
+			}
+		case ".yml":
+			if err := UnmarshalYAML(tc.file, msg); err != nil {
+				t.Fatalf("%+v\n", err)
+			}
+		default:
+			t.Fatalf("unsupported input file type: %s\n.", tc.file)
 		}
-		got := proto.MarshalTextString(tc.msg)
+
+		got := proto.MarshalTextString(msg)
 		if got != tc.want {
 			t.Errorf("got: %q, wanted: %q\n", got, tc.want)
 		}

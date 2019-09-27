@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "context.go",
+        "lexer.go",
+        "literalfield_set.go",
+        "parser.go",
+    ],
+    importmap = "github.com/bitnami-labs/jenkins-plugins-resolver/vendor/github.com/google/go-jsonnet/internal/parser",
+    importpath = "github.com/google/go-jsonnet/internal/parser",
+    visibility = ["//vendor/github.com/google/go-jsonnet:__subpackages__"],
+    deps = [
+        "//vendor/github.com/google/go-jsonnet/ast:go_default_library",
+        "//vendor/github.com/google/go-jsonnet/internal/errors:go_default_library",
+    ],
+)
