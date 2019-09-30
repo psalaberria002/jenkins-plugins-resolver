@@ -11,8 +11,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	jsonnet "github.com/google/go-jsonnet"
+	version "github.com/hashicorp/go-version"
 	"github.com/juju/errors"
-	"go.nami.run/gotools/version"
 )
 
 // FileExists will test if a file exists
@@ -102,7 +102,7 @@ func UnmarshalFile(filename string, pb proto.Message) error {
 
 // VersionLower returns whether i version is lower than j version
 func VersionLower(i string, j string) (bool, error) {
-	vj, err := version.New(j)
+	vj, err := version.NewVersion(j)
 	if err != nil {
 		return false, errors.Errorf("Error parsing version %s: %s", j, err)
 	}
@@ -111,10 +111,10 @@ func VersionLower(i string, j string) (bool, error) {
 		return true, nil
 	}
 
-	vi, err := version.New(i)
+	vi, err := version.NewVersion(i)
 	if err != nil {
 		return false, errors.Errorf("Error parsing version %s: %s", i, err)
 	}
 
-	return vi.Less(vj), nil
+	return vi.LessThan(vj), nil
 }
