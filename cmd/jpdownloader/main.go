@@ -26,6 +26,14 @@ var (
 	inputFile  = flag.String("input", "plugins.json.lock", "input file. You can use the output of jpresolver")
 )
 
+func readInput() (*api.PluginsRegistry, error) {
+	plugins := &api.PluginsRegistry{}
+	if err := utils.UnmarshalFile(*inputFile, plugins); err != nil {
+		return nil, errors.Trace(err)
+	}
+	return plugins, nil
+}
+
 // This function will copy the downloaded plugins (from the working directory
 // used to as fs cache) to the output directory. It will rename them to match
 // the jenkins requirements (no version in the filename).
@@ -62,8 +70,8 @@ func run() error {
 		return errors.Trace(err)
 	}
 
-	plugins := &api.PluginsRegistry{}
-	if err := utils.UnmarshalJSON(*inputFile, plugins); err != nil {
+	plugins, err := readInput()
+	if err != nil {
 		return errors.Trace(err)
 	}
 

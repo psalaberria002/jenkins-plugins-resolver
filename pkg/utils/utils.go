@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/ghodss/yaml"
 
@@ -67,7 +68,7 @@ func UnmarshalYAML(filename string, pb proto.Message) error {
 	return jsonpb.UnmarshalString(string(jsb), pb)
 }
 
-// MarshalJSON marshals a protocol buffer into a JSON filpb.
+// MarshalJSON marshals a protocol buffer into a JSON file.
 func MarshalJSON(filename string, pb proto.Message) error {
 	f, err := os.Create(filename)
 	if err != nil {
@@ -77,6 +78,26 @@ func MarshalJSON(filename string, pb proto.Message) error {
 
 	m := &jsonpb.Marshaler{Indent: "  "}
 	return m.Marshal(f, pb)
+}
+
+// UnmarshalFile unmarshals a file into a protocol buffer
+func UnmarshalFile(filename string, pb proto.Message) error {
+	var unmarshal func(string, proto.Message) error
+	switch filepath.Ext(filename) {
+	case ".json":
+		unmarshal = UnmarshalJSON
+	case ".jsonnet":
+		unmarshal = UnmarshalJsonnet
+	case ".yaml", ".yml":
+		unmarshal = UnmarshalYAML
+	}
+	if unmarshal == nil {
+		return errors.Errorf("unsupported input file type: %s\n", filename)
+	}
+	if err := unmarshal(filename, pb); err != nil {
+		return errors.Trace(err)
+	}
+	return nil
 }
 
 // VersionLower returns whether i version is lower than j version
