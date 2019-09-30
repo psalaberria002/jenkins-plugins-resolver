@@ -1,5 +1,5 @@
 
-< [Prev](lock-file.md) (*Lock File*) >
+< [Prev](lock-file.md) (*Lock File*) | [Home](../README.md) >
 
 ___
 
@@ -54,4 +54,4 @@ $ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME:$JENKINS_HOME -v $PWD:/ws -w 
 
 ___
 
-< [Prev](lock-file.md) (*Lock File*) >
+< [Prev](lock-file.md) (*Lock File*) | [Home](../README.md) >
