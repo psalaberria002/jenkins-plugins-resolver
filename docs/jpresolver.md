@@ -47,7 +47,7 @@ Examples:
 
 | **Input**             | **Output**
 | --------------------- | --------------------------
-| `plugins.json`        | `plugins.lock.json`
+| `plugins.json`        | `plugins-lock.json`
 | `myproject.prod.json` | `myproject.prod-lock.json`
 
 ### Working directory
