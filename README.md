@@ -4,7 +4,7 @@
 
 Jenkins Plugin Resolver is a Go application to manage Jenkins projects.
 
-This application manages your project dependencies, by resolving their transitive dependencies and downloading them with two different tools.
+This application manages your project dependencies, by resolving their transitive dependencies offline (no need to run Jenkins) and downloading the full list of dependencies in the Jenkins plugins folder.
 
 ## Installation
 
