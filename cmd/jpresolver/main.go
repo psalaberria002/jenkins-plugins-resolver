@@ -26,7 +26,7 @@ var (
 	inputFile  = flag.String("input", "plugins.json", "input file (.json, .jsonnet. .yaml or .yml)")
 	optional   = flag.Bool("optional", false, "add optional dependencies to the output. It will allow plugins to run with all the expected features.")
 	showGraph  = flag.Bool("show-graph", false, "show whole dependencies graph in JSON")
-	workingDir = flag.String("working-dir", filepath.Join(os.Getenv("HOME"), ".jenkins"), "plugins working dir")
+	workingDir = flag.String("working-dir", filepath.Join(os.Getenv("HOME"), ".jpr"), "plugins working dir")
 )
 
 func resolve(pr *api.PluginsRegistry) (*api.PluginsRegistry, error) {
