@@ -2,10 +2,7 @@ package graph
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
-
-	"github.com/juju/errors"
 )
 
 // GetStorePath returns the path to the store
@@ -20,12 +17,4 @@ func GetGraphPath(hash string, workingDir string) string {
 	// will remain the same over time (thankfully). Therefore, by using the hash of the input
 	// file for the graph filename we grant reproducibility.
 	return filepath.Join(GetStorePath(workingDir), fmt.Sprintf("%s.graph", hash))
-}
-
-// EnsureStorePathExists will create the store path directory if it does not exist
-func EnsureStorePathExists(workingDir string) error {
-	if err := os.MkdirAll(GetStorePath(workingDir), 0777); err != nil {
-		return errors.Errorf("unable to create the store path: %+v", err)
-	}
-	return nil
 }

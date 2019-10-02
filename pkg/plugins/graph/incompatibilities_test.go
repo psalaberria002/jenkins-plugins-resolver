@@ -166,7 +166,7 @@ func TestFindIncompatibilities(t *testing.T) {
 				t.Fatalf("%+v", err)
 			}
 			if !tc.incompatibilities && len(incs) > 0 {
-				incs.PrintIncompatibilities()
+				incs.Print()
 				t.Errorf("not expected to find incompatibilities but it did (optional: %v)", optional)
 			}
 			if tc.incompatibilities && len(incs) == 0 {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/common"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/testdownloader"
 )
 
@@ -61,7 +62,7 @@ func TestDownload(t *testing.T) {
 func TestFetchPlugin(t *testing.T) {
 	workingDir := filepath.Join(os.TempDir(), ".jenkins")
 	defer os.RemoveAll(workingDir)
-	if err := EnsureStorePathExists(workingDir); err != nil {
+	if err := common.EnsureStorePathExists(workingDir, GetStorePath); err != nil {
 		t.Fatalf("%+v", err)
 	}
 
@@ -91,7 +92,7 @@ func TestFetchPlugin(t *testing.T) {
 func TestRunWorkersPoll(t *testing.T) {
 	workingDir := filepath.Join(os.TempDir(), ".jenkins")
 	defer os.RemoveAll(workingDir)
-	if err := EnsureStorePathExists(workingDir); err != nil {
+	if err := common.EnsureStorePathExists(workingDir, GetStorePath); err != nil {
 		t.Fatalf("%+v", err)
 	}
 

@@ -7,13 +7,16 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//api:go_default_library",
+        "//pkg/plugins/common:go_default_library",
         "//pkg/plugins/downloader/jenkinsdownloader:go_default_library",
         "//pkg/plugins/graph:go_default_library",
         "//pkg/plugins/jpi:go_default_library",
         "//pkg/plugins/meta:go_default_library",
+        "//pkg/plugins/war:go_default_library",
         "//pkg/utils:go_default_library",
         "//vendor/github.com/golang/protobuf/jsonpb:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/mmikulicic/multierror:go_default_library",
     ],
 )
 

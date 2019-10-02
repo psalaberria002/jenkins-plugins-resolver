@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "incompatibilities.go",
+        "store.go",
+    ],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/common",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/juju/errors:go_default_library"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["store_test.go"],
+    embed = [":go_default_library"],
+    deps = ["//pkg/utils:go_default_library"],
+)

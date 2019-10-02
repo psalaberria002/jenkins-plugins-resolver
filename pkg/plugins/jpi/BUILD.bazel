@@ -4,7 +4,6 @@ go_library(
     name = "go_default_library",
     srcs = [
         "downloader.go",
-        "extractor.go",
         "parser.go",
         "store.go",
     ],
@@ -14,7 +13,6 @@ go_library(
         "//api:go_default_library",
         "//pkg/plugins/downloader/common:go_default_library",
         "//pkg/utils:go_default_library",
-        "//pkg/zip:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",
         "//vendor/github.com/mmikulicic/multierror:go_default_library",
     ],
@@ -24,16 +22,14 @@ go_test(
     name = "go_default_test",
     srcs = [
         "downloader_test.go",
-        "extractor_test.go",
         "parser_test.go",
-        "store_test.go",
     ],
     data = glob(["testdata/**"]),
     embed = [":go_default_library"],
     deps = [
         "//api:go_default_library",
+        "//pkg/plugins/common:go_default_library",
         "//pkg/plugins/downloader/testdownloader:go_default_library",
-        "//pkg/utils:go_default_library",
         "//vendor/github.com/golang/protobuf/proto:go_default_library",
     ],
 )

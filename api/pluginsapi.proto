@@ -31,3 +31,8 @@ message Graph {
 message Project {
   map<string,string> dependencies = 1;
 }
+
+message Jenkins {
+  string version = 1;
+  repeated PluginMetadata plugins = 2;
+}

@@ -40,3 +40,52 @@ func TestOpenFile(t *testing.T) {
 		}
 	}
 }
+
+func TestExtractFile(t *testing.T) {
+	testCases := []struct {
+		zip  string
+		file string
+		want string
+	}{
+		// File in root
+		{"testdata/test.zip", "test/foo.txt", "hello world!\n"},
+		// File in folder
+		{"testdata/test.zip", "foo.txt", "hello world!\n"},
+	}
+	for _, tc := range testCases {
+		data, err := ExtractFile(tc.zip, tc.file)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+
+		if string(data) != tc.want {
+			t.Errorf("wanted: %q, got: %q\n", tc.want, string(data))
+		}
+	}
+}
+
+func TestGetFileMimeType(t *testing.T) {
+	testCases := []struct {
+		file string
+		want string
+	}{
+		{"testdata/foo.war", "application/zip"},
+		{"testdata/test.zip", "application/zip"},
+	}
+
+	for _, tc := range testCases {
+		r, err := os.Open(tc.file)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		defer r.Close()
+
+		got, err := GetFileMimeType(r)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		if got != tc.want {
+			t.Errorf("wanted: %s, got: %s", tc.want, got)
+		}
+	}
+}

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/common"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/jenkinsdownloader"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jpi"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
@@ -92,7 +93,7 @@ func validateFlags() error {
 	} else if !ok {
 		return errors.Errorf("the output directory does not exist")
 	}
-	if err := jpi.EnsureStorePathExists(*workingDir); err != nil {
+	if err := common.EnsureStorePathExists(*workingDir, jpi.GetStorePath); err != nil {
 		return errors.Trace(err)
 	}
 	return nil

@@ -29,3 +29,18 @@ func (p *Project) GetPluginsRegistry() *PluginsRegistry {
 		Plugins: plugins,
 	}
 }
+
+// ByName implements the sort.Interface interface for sorting list of plugins
+type ByName []*Plugin
+
+func (pl ByName) Len() int {
+	return len(pl)
+}
+
+func (pl ByName) Less(i, j int) bool {
+	return pl[i].Name < pl[j].Name
+}
+
+func (pl ByName) Swap(i, j int) {
+	pl[i], pl[j] = pl[j], pl[i]
+}

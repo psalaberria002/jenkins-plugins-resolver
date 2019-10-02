@@ -1,23 +1,24 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
-    srcs = ["main.go"],
-    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/cmd/jpdownloader",
+    srcs = [
+        "extractor.go",
+        "incompatibilities.go",
+        "parser.go",
+        "store.go",
+        "war.go",
+    ],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/war",
     visibility = ["//visibility:public"],
     deps = [
         "//api:go_default_library",
         "//pkg/plugins/common:go_default_library",
-        "//pkg/plugins/downloader/jenkinsdownloader:go_default_library",
+        "//pkg/plugins/jar:go_default_library",
         "//pkg/plugins/jpi:go_default_library",
         "//pkg/utils:go_default_library",
+        "//pkg/zip:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",
         "//vendor/github.com/mmikulicic/multierror:go_default_library",
     ],
-)
-
-go_binary(
-    name = "jpdownloader",
-    embed = [":go_default_library"],
-    visibility = ["//visibility:public"],
 )

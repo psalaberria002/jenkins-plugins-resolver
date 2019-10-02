@@ -2,18 +2,18 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
-    srcs = ["zip.go"],
-    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/zip",
+    srcs = ["extractor.go"],
+    importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jar",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/zip:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",
-        "//vendor/github.com/mmikulicic/multierror:go_default_library",
     ],
 )
 
 go_test(
     name = "go_default_test",
-    srcs = ["zip_test.go"],
+    srcs = ["extractor_test.go"],
     data = glob(["testdata/**"]),
     embed = [":go_default_library"],
 )

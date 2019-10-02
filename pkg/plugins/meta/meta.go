@@ -5,6 +5,7 @@ import (
 
 	api "github.com/bitnami-labs/jenkins-plugins-resolver/api"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/common"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jar"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jpi"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/juju/errors"
@@ -49,7 +50,7 @@ func FetchMetadata(p *api.Plugin, d common.Downloader, workingDir string) error 
 	}
 
 	jpiFile := jpi.GetPluginPath(p, workingDir)
-	manifest, err := jpi.ExtractManifest(jpiFile)
+	manifest, err := jar.ExtractManifest(jpiFile)
 	if err != nil {
 		return errors.Trace(err)
 	}

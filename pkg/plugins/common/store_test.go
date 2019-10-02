@@ -1,4 +1,4 @@
-package jpi
+package common
 
 import (
 	"os"
@@ -20,7 +20,11 @@ func TestEnsureStorePathExists(t *testing.T) {
 		t.Errorf("%s should not exist before ensuring it exists", folder)
 	}
 
-	if err := EnsureStorePathExists(folder); err != nil {
+	pathGen := func(workingDir string) string {
+		return filepath.Join(workingDir, "foo")
+	}
+
+	if err := EnsureStorePathExists(folder, pathGen); err != nil {
 		t.Fatalf("%+v", err)
 	}
 
