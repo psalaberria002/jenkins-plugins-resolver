@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "api.go",
         "pluginsapi.pb.go",
+        "sort.go",
     ],
     importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/api",
     visibility = ["//visibility:public"],

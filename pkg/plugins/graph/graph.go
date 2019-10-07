@@ -63,11 +63,11 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 }
 
 // FetchGraph computes the graph for a list of plugins or read it from the store
-func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, inputFile string, workingDir string, maxWorkers int) (*api.Graph, error) {
+func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir string, maxWorkers int) (*api.Graph, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutMin*time.Minute)
 	defer cancel()
 
-	hash, err := crypto.SHA256(inputFile)
+	hash, err := crypto.SHA256(plugins)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

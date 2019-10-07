@@ -5,7 +5,11 @@ go_library(
     srcs = ["crypto.go"],
     importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/crypto",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/juju/errors:go_default_library"],
+    deps = [
+        "//vendor/github.com/golang/protobuf/jsonpb:go_default_library",
+        "//vendor/github.com/golang/protobuf/proto:go_default_library",
+        "//vendor/github.com/juju/errors:go_default_library",
+    ],
 )
 
 go_test(
@@ -13,4 +17,8 @@ go_test(
     srcs = ["crypto_test.go"],
     data = glob(["testdata/**"]),
     embed = [":go_default_library"],
+    deps = [
+        "//pkg/utils/testdata/example:go_default_library",
+        "//vendor/github.com/golang/protobuf/proto:go_default_library",
+    ],
 )
