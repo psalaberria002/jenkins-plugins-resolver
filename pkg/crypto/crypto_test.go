@@ -16,12 +16,12 @@ func TestSHA256(t *testing.T) {
 			pb: &example.Test{Foo: 123, Bar: "string"},
 			// $ cat -t test
 			// {
-			//   "foo": 123,
 			//   "bar": "string"
+			//   "foo": 123,
 			// }%
 			// $ sha256sum test
-			// 9748e3d228813b8d2f305a08de6ee38165e797a683714a6eb0dcd79f0c99b06d  test
-			want: "9748e3d228813b8d2f305a08de6ee38165e797a683714a6eb0dcd79f0c99b06d",
+			// 3135baa3a6668734085a13e7d66c36a7d3ae892c5cfb6f1476ceb3c682d46427  test
+			want: "3135baa3a6668734085a13e7d66c36a7d3ae892c5cfb6f1476ceb3c682d46427",
 		},
 	}
 	for _, tc := range testCases {

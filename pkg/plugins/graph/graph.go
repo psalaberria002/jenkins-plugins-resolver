@@ -2,6 +2,8 @@ package graph
 
 import (
 	"context"
+	"log"
+	"sort"
 	"time"
 
 	api "github.com/bitnami-labs/jenkins-plugins-resolver/api"
@@ -67,6 +69,9 @@ func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir st
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutMin*time.Minute)
 	defer cancel()
 
+	// NOTE: We need to ensure that the list of plugins are properly
+	//       sorted before computing its hash.
+	sort.Sort(api.ByName(plugins.Plugins))
 	hash, err := crypto.SHA256(plugins)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -79,9 +84,11 @@ func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir st
 	}
 
 	if cached {
+		log.Printf("Reading graph from disk: %s\n", graphPath)
 		return ReadGraph(graphPath)
 	}
 
+	log.Println("Computing graph...")
 	if err := fetch(ctx, plugins, d, workingDir, maxWorkers); err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -107,6 +114,7 @@ func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir st
 	if err := WriteGraph(&g, graphPath); err != nil {
 		return nil, errors.Trace(err)
 	}
+	log.Printf("Recorded graph to disk: %s\n", graphPath)
 
 	return &g, nil
 }
