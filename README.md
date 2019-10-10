@@ -8,7 +8,14 @@ This application manages your project dependencies, by resolving their transitiv
 
 ## Installation
 
-You can either use the Docker images or build the binaries.
+You can either use the Go binaries, the Docker images or build the binaries yourself.
+
+### Binaries
+
+```shell
+go get github.com/bitnami-labs/jenkins-plugins-resolver/cmd/jpresolver
+go get github.com/bitnami-labs/jenkins-plugins-resolver/cmd/jpdownloader
+```
 
 ### Docker
 
@@ -19,7 +26,7 @@ docker pull gcr.io/bitnami-labs/jenkins-plugins-resolver:latest
 docker pull gcr.io/bitnami-labs/jenkins-plugins-downloader:latest
 ```
 
-### Binaries
+### Build
 
 You need to [install bazel](#install-bazel) to build the binaries locally.
 

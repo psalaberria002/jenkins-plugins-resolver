@@ -4,7 +4,6 @@ go_library(
     name = "go_default_library",
     srcs = [
         "extractor.go",
-        "incompatibilities.go",
         "parser.go",
         "store.go",
         "war.go",
@@ -13,9 +12,9 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//api:go_default_library",
-        "//pkg/plugins/common:go_default_library",
         "//pkg/plugins/jar:go_default_library",
         "//pkg/plugins/jpi:go_default_library",
+        "//pkg/plugins/requesters:go_default_library",
         "//pkg/utils:go_default_library",
         "//pkg/zip:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",

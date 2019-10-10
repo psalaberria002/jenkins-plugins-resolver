@@ -11,22 +11,8 @@ If there are incompatibilities between the project dependencies and the transiti
 
 ## Usage
 
-### Docker image
-
-```
-docker run --rm -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-resolver:latest -optional
-```
-
-### Bazel
-
-```
-bazel run //cmd/jpresolver:jpresolver -- -input $PWD/plugins.json -optional
-```
-
-### Binary
-
-```
-jpresolver -optional
+```console
+jpresolver -input plugins.json -war jenkins.war -optional
 ```
 
 ## Inputs
@@ -34,6 +20,10 @@ jpresolver -optional
 ### Project file
 
 The [project file](project-file.md) can be provided via `-input` flag (defaults to the relative `plugins.json` file).
+
+### Jenkins .war file
+
+The Jenkins war file can be provided via `-war` flag and it will be used to improve the dependencies resolution from the provided Jenkins version.
 
 ### Optional
 
@@ -59,6 +49,7 @@ The working directories will mainly work as a [filesystem cache](#cache) to avoi
 - `workdir/jpi` will be used to store jpi archives (jenkins plugins).
 - `workdir/meta` will be used to store the plugins metadata.
 - `workdir/graph` will be used to store the plugins dependencies graph from different runs.
+- `workdir/war` will be used to store the Jenkins war detached plugins from different runs.
 
 ## Cache
 
@@ -77,10 +68,13 @@ dependencies:
 
 ```console
 $ jpresolver -input plugins.yml
-2019/09/24 17:03:51 > fetching google-login:1.4 metadata...
-2019/09/24 17:03:51  There were found some incompatibilities:
-2019/09/24 17:03:51   ├── mailer:1.1 (a newer version was locked: mailer:1.6):
-2019/09/24 17:03:51   │   └── google-login:1.4 > mailer:1.6
+2019/10/09 23:37:46 Computing graph...
+2019/10/09 23:37:46 Recorded graph to disk: /Users/jotadrilo/.jpr/graph/4db6fb76c293c35ac1bdb25838028d6db8cec47be70dfe0a71ed3fd155b93bc7.graph
+2019/10/09 23:37:46  There were found some incompatibilities:
+2019/10/09 23:37:46   └── Requester: mailer:1.1 (project file)
+2019/10/09 23:37:46       Cause: Some plugins require a newer version.
+2019/10/09 23:37:46         └── google-login:1.4 (project file) > mailer:1.6
+2019/10/09 23:37:46
 ```
 ___
 

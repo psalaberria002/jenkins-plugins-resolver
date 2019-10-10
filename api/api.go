@@ -3,7 +3,11 @@
 // Package api provides APIs for plugins relate formats
 package api
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/requesters"
+)
 
 // Filename returns the filename string for a plugin
 func (p *Plugin) Filename() string {
@@ -21,8 +25,9 @@ func (p *Project) GetPluginsRegistry() *PluginsRegistry {
 	plugins := []*Plugin{}
 	for name, version := range p.Dependencies {
 		plugins = append(plugins, &Plugin{
-			Name:    name,
-			Version: version,
+			Name:      name,
+			Version:   version,
+			Requester: requesters.PROJECT,
 		})
 	}
 	return &PluginsRegistry{

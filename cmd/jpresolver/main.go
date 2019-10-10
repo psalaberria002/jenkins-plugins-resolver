@@ -28,15 +28,77 @@ const (
 
 var (
 	inputFile  = flag.String("input", "plugins.json", "input file (.json, .jsonnet. .yaml or .yml)")
-	warFile    = flag.String("war", "jenkins.war", "jenkins war file")
+	warFile    = flag.String("war", "", "jenkins war file")
 	optional   = flag.Bool("optional", false, "add optional dependencies to the output. It will allow plugins to run with all the expected features.")
 	showGraph  = flag.Bool("show-graph", false, "show whole dependencies graph in JSON")
 	workingDir = flag.String("working-dir", filepath.Join(os.Getenv("HOME"), ".jpr"), "plugins working dir")
 )
 
-func lockPlugins(pr *api.PluginsRegistry, input string) (*api.PluginsRegistry, error) {
+// mergePlugins returns the merge of two slices of plugins with some caveats:
+//
+// The requested plugins are provided by the user and the bundled plugins are Jenkins dependencies.
+// Therefore, we will include all the requested versions that meet the Jenkins requirements. Otherwise,
+// it will fail.
+//
+// Any additional bundled plugin (not present in the requested plugin list) will be included too.
+func mergePlugins(requestedPlugins []*api.Plugin, bundledPlugins []*api.Plugin) ([]*api.Plugin, error) {
+	var errs error
+
+	plugins := []*api.Plugin{}
+	for _, requestedPlugin := range requestedPlugins {
+		// A requested plugin is compatible if the bundled plugin list does not
+		// include the same plugin with a higher version request.
+		compatible := func(rp *api.Plugin) error {
+			for _, bp := range bundledPlugins {
+				if rp.Name == bp.Name {
+					lower, err := utils.VersionLower(bp.Version, rp.Version)
+					if err != nil {
+						return errors.Trace(err)
+					}
+					if !lower && rp.Version != bp.Version {
+						return errors.Errorf("found bundled plugin %s: it is higher than the requested %s plugin, they are incompatible. Please bump your requested plugin version.", bp.Identifier(), rp.Identifier())
+					}
+				}
+			}
+			return nil
+		}
+
+		if err := compatible(requestedPlugin); err != nil {
+			errs = multierror.Append(errs, errors.Trace(err))
+			continue
+		}
+		plugins = append(plugins, requestedPlugin)
+	}
+	if errs != nil {
+		return plugins, errors.Trace(errs)
+	}
+
+	// Add remaining plugins
+	for _, bundledPlugin := range bundledPlugins {
+		found := false
+		for _, p := range plugins {
+			if bundledPlugin.Name == p.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Printf("added bundled plugin %s.\n", bundledPlugin.Identifier())
+			plugins = append(plugins, bundledPlugin)
+		}
+	}
+
+	return plugins, nil
+}
+
+func lockPlugins(requestedPlugins []*api.Plugin, bundledPlugins []*api.Plugin) (*api.PluginsRegistry, error) {
+	plugins, err := mergePlugins(requestedPlugins, bundledPlugins)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	downloader := jenkinsdownloader.NewDownloader()
-	g, err := graph.FetchGraph(pr, downloader, *workingDir, maxWorkers)
+	g, err := graph.FetchGraph(plugins, downloader, *workingDir, maxWorkers)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -53,12 +115,12 @@ func lockPlugins(pr *api.PluginsRegistry, input string) (*api.PluginsRegistry, e
 		return nil, errors.Trace(err)
 	}
 
-	incs, err := graph.FindIncompatibilities(pr, lock, g)
+	incs, err := graph.FindIncompatibilities(plugins, lock.Plugins, g)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	if len(incs) > 0 {
-		log.Printf(" There were found some incompatibilities within %s:\n", filepath.Base(input))
+		log.Printf(" There were found some incompatibilities:\n")
 		incs.Print()
 	}
 
@@ -91,32 +153,18 @@ func run() error {
 	}
 	plugins := project.GetPluginsRegistry()
 
-	jk, err := war.Read(*warFile, *workingDir)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	jkpr := war.NewPluginsRegistry(jk)
-
-	// Lock the input plugins
-	lock, err := lockPlugins(plugins, *inputFile)
-	if err != nil {
-		return errors.Trace(err)
+	jkpr := &api.PluginsRegistry{}
+	if *warFile != "" {
+		jk, err := war.Read(*warFile, *workingDir)
+		if err != nil {
+			return errors.Trace(err)
+		}
+		jkpr = war.NewPluginsRegistry(jk)
 	}
 
-	// Lock the jenkins plugins
-	jkLock, err := lockPlugins(jkpr, *warFile)
+	lock, err := lockPlugins(plugins.Plugins, jkpr.Plugins)
 	if err != nil {
 		return errors.Trace(err)
-	}
-
-	// Add missing jenkins bundled plugins to the locked plugins
-	bics, err := war.AggregateBundledPlugins(plugins, jkLock, lock)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	if len(bics) > 0 {
-		log.Printf(" There were found some incompatibilities within %s:\n", filepath.Base(*warFile))
-		bics.Print()
 	}
 
 	return writeOutput(lock)

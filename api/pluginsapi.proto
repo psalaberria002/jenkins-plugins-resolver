@@ -4,6 +4,7 @@ option go_package = "api";
 message Plugin {
   string name = 1;
   string version = 2;
+  string requester = 3;
 }
 
 message PluginMetadata {

@@ -161,7 +161,7 @@ func TestFindIncompatibilities(t *testing.T) {
 				t.Fatalf("%+v", err)
 			}
 
-			incs, err := FindIncompatibilities(pr, lock, g)
+			incs, err := FindIncompatibilities(pr.Plugins, lock.Plugins, g)
 			if err != nil {
 				t.Fatalf("%+v", err)
 			}

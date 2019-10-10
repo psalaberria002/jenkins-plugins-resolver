@@ -2,10 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
-    srcs = [
-        "incompatibilities.go",
-        "store.go",
-    ],
+    srcs = ["store.go"],
     importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/common",
     visibility = ["//visibility:public"],
     deps = ["//vendor/github.com/juju/errors:go_default_library"],

@@ -5,6 +5,7 @@ import (
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/jar"
+	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/requesters"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
 	"github.com/juju/errors"
 )
@@ -77,7 +78,12 @@ func AddMissings(jkpr *api.PluginsRegistry, pr *api.PluginsRegistry) {
 func NewPluginsRegistry(jk *api.Jenkins) *api.PluginsRegistry {
 	jkpr := &api.PluginsRegistry{}
 	for _, warPluginMetadata := range jk.GetPlugins() {
-		jkpr.Plugins = append(jkpr.Plugins, warPluginMetadata.GetPlugin())
+		p := warPluginMetadata.GetPlugin()
+		jkpr.Plugins = append(jkpr.Plugins, &api.Plugin{
+			Name:      p.Name,
+			Version:   p.Version,
+			Requester: requesters.WAR,
+		})
 	}
 	return jkpr
 }

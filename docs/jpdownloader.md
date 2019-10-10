@@ -41,7 +41,18 @@ If you are using kubernetes, you may use this tool within an init container to d
 
 If you are using a virtual machine, hosted server, local machine, etc, you may use this tool as part of the Jenkins start command/service so it prepares the plugins before Jenkins actually starts.
 
-Independently to your DevOps, let's assume you are running the docker image in the target environment and the lock file is in your current directory:
+Independently to your DevOps, let's assume you are running the tool in the target environment and the lock file is in your current directory:
+
+#### Binaries
+
+```console
+$ jpdownloader
+2019/09/19 12:57:32 > downloading mailer:1.6...
+2019/09/19 12:57:32 > downloading google-login:1.4...
+2019/09/19 12:57:35 done!
+```
+
+#### Docker images
 
 ```console
 $ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME:$JENKINS_HOME -v $PWD:/ws -w /ws gcr.io/bitnami-labs/jenkins-plugins-downloader:latest
@@ -55,3 +66,4 @@ $ docker run --rm -e JENKINS_HOME -v $JENKINS_HOME:$JENKINS_HOME -v $PWD:/ws -w 
 ___
 
 < [Prev](lock-file.md) (*Lock File*) | [Home](../README.md) >
+****

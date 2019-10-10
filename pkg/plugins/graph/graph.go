@@ -65,14 +65,14 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 }
 
 // FetchGraph computes the graph for a list of plugins or read it from the store
-func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir string, maxWorkers int) (*api.Graph, error) {
+func FetchGraph(plugins []*api.Plugin, d common.Downloader, workingDir string, maxWorkers int) (*api.Graph, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutMin*time.Minute)
 	defer cancel()
 
 	// NOTE: We need to ensure that the list of plugins are properly
 	//       sorted before computing its hash.
-	sort.Sort(api.ByName(plugins.Plugins))
-	hash, err := crypto.SHA256(plugins)
+	sort.Sort(api.ByName(plugins))
+	hash, err := crypto.SHA256(&api.PluginsRegistry{Plugins: plugins})
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -96,7 +96,7 @@ func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir st
 	// Iterate the provided list of plugins first to initialize the map
 	var errs error
 	var nodes []*api.Graph_Node
-	for _, p := range plugins.Plugins {
+	for _, p := range plugins {
 		node, err := NewNode(p, workingDir)
 		if err != nil {
 			errs = multierror.Append(errs, errors.Trace(err))
@@ -119,7 +119,7 @@ func FetchGraph(plugins *api.PluginsRegistry, d common.Downloader, workingDir st
 	return &g, nil
 }
 
-func fetch(ctx context.Context, plugins *api.PluginsRegistry, d common.Downloader, workingDir string, maxWorkers int) error {
+func fetch(ctx context.Context, plugins []*api.Plugin, d common.Downloader, workingDir string, maxWorkers int) error {
 	var errs error
 
 	// Iterate the provided list of plugins first to fetch the metadata from upstream
@@ -128,7 +128,7 @@ func fetch(ctx context.Context, plugins *api.PluginsRegistry, d common.Downloade
 	}
 
 	// Read metadata to fetch the metadata for them
-	for _, p := range plugins.Plugins {
+	for _, p := range plugins {
 		metaPath := meta.GetMetaPath(p, workingDir)
 		pm, err := meta.ReadMetadata(metaPath)
 		if err != nil {
@@ -137,19 +137,13 @@ func fetch(ctx context.Context, plugins *api.PluginsRegistry, d common.Downloade
 		}
 
 		// Iterate dependencies
-		depPluginsRegistry := api.PluginsRegistry{
-			Plugins: pm.Dependencies,
-		}
-		if err := fetch(ctx, &depPluginsRegistry, d, workingDir, maxWorkers); err != nil {
+		if err := fetch(ctx, pm.Dependencies, d, workingDir, maxWorkers); err != nil {
 			errs = multierror.Append(errs, err)
 			continue
 		}
 
 		// Iterate optional dependencies
-		optDepPluginsRegistry := api.PluginsRegistry{
-			Plugins: pm.OptionalDependencies,
-		}
-		if err := fetch(ctx, &optDepPluginsRegistry, d, workingDir, maxWorkers); err != nil {
+		if err := fetch(ctx, pm.OptionalDependencies, d, workingDir, maxWorkers); err != nil {
 			errs = multierror.Append(errs, err)
 			continue
 		}
