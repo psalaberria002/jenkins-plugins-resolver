@@ -1,5 +1,6 @@
 # http://goreleaser.com
 project_name: jpresolver
+
 builds:
 - id: jpdownloader
   main: ./cmd/jpdownloader/main.go
@@ -9,11 +10,12 @@ builds:
   main: ./cmd/jpresolver/main.go
   goarch:
   - amd64
+
 archives:
 - id: jpdownloader
   builds:
   - jpdownloader
-  name_template: 'jpdownloader_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  # name_template: 'jpdownloader_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
   files:
     - README.md
   replacements:
@@ -21,21 +23,25 @@ archives:
 - id: jpresolver
   builds:
   - jpresolver
-  name_template: 'jpresolver_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  # name_template: 'jpresolver_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
   files:
     - README.md
   replacements:
     amd64: x86_64
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
   name_template: "{{ .FullCommit }}-{{ .Tag }}-snapshot"
+
 changelog:
   sort: asc
   filters:
     exclude:
     - '^docs:'
     - '^test:'
+
 sign:
   signature: "${artifact}.sig"
   cmd: gpg
