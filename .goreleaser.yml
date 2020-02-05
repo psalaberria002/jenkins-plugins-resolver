@@ -1,0 +1,32 @@
+# http://goreleaser.com
+project_name: jpresolver
+builds:
+- id: jpdownloader
+  main: ./cmd/jpdownloader/main.go
+  goarch:
+  - amd64
+- id: jpresolver
+  main: ./cmd/jpresolver/main.go
+  goarch:
+  - amd64
+archives:
+- id: default
+  files:
+    - README.md
+  replacements:
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .FullCommit }}-{{ .Tag }}-snapshot"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+sign:
+  signature: "${artifact}.sig"
+  cmd: gpg
+  args: ["-u", "josriolop@gmail.com", "--output", "${signature}", "--detach-sign", "${artifact}"]
+  artifacts: all
