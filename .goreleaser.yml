@@ -3,10 +3,12 @@ project_name: jpresolver
 
 builds:
 - id: jpdownloader
+  binary: jpdownloader
   main: ./cmd/jpdownloader/main.go
   goarch:
   - amd64
 - id: jpresolver
+  binary: jpresolver
   main: ./cmd/jpresolver/main.go
   goarch:
   - amd64
@@ -15,7 +17,7 @@ archives:
 - id: jpdownloader
   builds:
   - jpdownloader
-  # name_template: 'jpdownloader_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  name_template: 'jpdownloader_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
   files:
     - README.md
   replacements:
@@ -23,7 +25,7 @@ archives:
 - id: jpresolver
   builds:
   - jpresolver
-  # name_template: 'jpresolver_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  name_template: 'jpresolver_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
   files:
     - README.md
   replacements:
