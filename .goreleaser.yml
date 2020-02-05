@@ -11,11 +11,13 @@ builds:
   - amd64
 archives:
 - id: jpdownloader
+  name_template: 'jpdownloader-{{ .Version }}-{{ .Os }}-{{ .Arch }}'
   files:
     - README.md
   replacements:
     amd64: x86_64
 - id: jpresolver
+  name_template: 'jpresolver-{{ .Version }}-{{ .Os }}-{{ .Arch }}'
   files:
     - README.md
   replacements:
