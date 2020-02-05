@@ -10,7 +10,12 @@ builds:
   goarch:
   - amd64
 archives:
-- id: default
+- id: jpdownloader
+  files:
+    - README.md
+  replacements:
+    amd64: x86_64
+- id: jpresolver
   files:
     - README.md
   replacements:
