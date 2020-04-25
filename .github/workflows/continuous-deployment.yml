@@ -49,11 +49,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Docker Login
-      uses: actions/docker/login@master
+      run: docker login https://gcr.io -u _json_key -p "${GCR_BITNAMI_LABS}"
       env:
-        DOCKER_PASSWORD: ${{ secrets.GCR_BITNAMI_LABS }}
-        DOCKER_USERNAME: _json_key
-        DOCKER_REGISTRY_URL: https://gcr.io
+        GCR_BITNAMI_LABS: ${{ secrets.GCR_BITNAMI_LABS }}
     - name: Publish jenkins-plugins-resolver (tag)
       uses: docker://l.gcr.io/google/bazel:0.29.1
       with:
