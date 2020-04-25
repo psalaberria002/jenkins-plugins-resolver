@@ -43,9 +43,3 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
-
-sign:
-  signature: "${artifact}.sig"
-  cmd: gpg
-  args: ["-u", "josriolop@gmail.com", "--output", "${signature}", "--detach-sign", "${artifact}"]
-  artifacts: all
