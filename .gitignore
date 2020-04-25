@@ -11,3 +11,6 @@ jenkins*war
 
 # Bazel directories
 bazel-*
+
+# Go Releaser
+dist
