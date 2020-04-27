@@ -13,12 +13,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
     - name: Build targets
-      uses: docker://l.gcr.io/google/bazel:0.29.1
+      uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: bazel build //...
     - name: Test targets
-      uses: docker://l.gcr.io/google/bazel:0.29.1
+      uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: bazel test //...

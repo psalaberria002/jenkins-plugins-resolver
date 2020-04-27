@@ -29,22 +29,22 @@ jobs:
       env:
         GCR_BITNAMI_LABS: ${{ secrets.GCR_BITNAMI_LABS }}
     - name: Publish jenkins-plugins-resolver container (tag)
-      uses: docker://l.gcr.io/google/bazel:0.29.1
+      uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: bazel run //docker/jpresolver:push_tag
     - name: Publish jenkins-plugins-resolver container (latest)
-      uses: docker://l.gcr.io/google/bazel:0.29.1
+      uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: bazel run //docker/jpresolver:push_latest
     - name: Publish jenkins-plugins-downloader container (tag)
-      uses: docker://l.gcr.io/google/bazel:0.29.1
+      uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: bazel run //docker/jpdownloader:push_tag
     - name: Publish jenkins-plugins-downloader container (latest)
-      uses: docker://l.gcr.io/google/bazel:0.29.1
+      uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: bazel run //docker/jpdownloader:push_latest
