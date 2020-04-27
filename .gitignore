@@ -1,16 +1,16 @@
 # Misc
-.jenkins
-.vscode
+/.jenkins
+/.vscode
 
 # Local runs
-plugins-lock.json
-plugins.json*
-plugins.yaml
-plugins.yml
-jenkins*war
+/plugins-lock.json
+/plugins.json*
+/plugins.yaml
+/plugins.yml
+/jenkins*war
 
 # Bazel directories
-bazel-*
+/bazel-*
 
 # Go Releaser
-dist
+/dist

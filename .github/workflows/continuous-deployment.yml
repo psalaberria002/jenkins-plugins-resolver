@@ -22,7 +22,7 @@ jobs:
       uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
-        args: -c "${GITHUB_WORKSPACE}/tools/bazel-docker-push.sh; ${GITHUB_WORKSPACE}/tools/bazel-docker-push-latest.sh"
+        args: -c "tools/bazel-docker-push.sh; tools/bazel-docker-push-latest.sh"
       env:
         DOCKER_CONFIG: ${HOME}/.docker/${GITHUB_RUN_ID}
     - name: Setup Go
