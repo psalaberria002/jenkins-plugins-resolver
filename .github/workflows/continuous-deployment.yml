@@ -24,13 +24,17 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Login GCR
+      run: docker login https://gcr.io -u _json_key -p "${GCR_BITNAMI_LABS}"
+      env:
+        DOCKER_CONFIG: ${GITHUB_WORKSPACE}/.docker/${GITHUB_RUN_ID}
     - name: Publish containers
       uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
         args: |
-          docker login https://gcr.io -u _json_key -p "${GCR_BITNAMI_LABS}"
           ./tools/bazel-docker-push.sh
           ./tools/bazel-docker-push-latest.sh
       env:
+        DOCKER_CONFIG: ${GITHUB_WORKSPACE}/.docker/${GITHUB_RUN_ID}
         GCR_BITNAMI_LABS: ${{ secrets.GCR_BITNAMI_LABS }}
