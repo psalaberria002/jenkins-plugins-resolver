@@ -13,11 +13,16 @@ jobs:
       uses: actions/checkout@master
     - name: Unshallow
       run: git fetch --prune --unshallow
-    - name: Find
+    - name: Login GCR
+      run: docker login https://gcr.io -u _json_key -p "${GCR_BITNAMI_LABS}"
+      env:
+        DOCKER_CONFIG: ${HOME}/.docker/${GITHUB_RUN_ID}
+        GCR_BITNAMI_LABS: ${{ secrets.GCR_BITNAMI_LABS }}
+    - name: Publish containers
       uses: docker://l.gcr.io/google/bazel:2.2.0
       with:
         entrypoint: /bin/bash
-        args: -c "find ${GITHUB_WORKSPACE}"
+        args: -c "${GITHUB_WORKSPACE}/tools/bazel-docker-push.sh; ${GITHUB_WORKSPACE}/tools/bazel-docker-push-latest.sh"
       env:
         DOCKER_CONFIG: ${HOME}/.docker/${GITHUB_RUN_ID}
     - name: Setup Go
@@ -31,15 +36,3 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Login GCR
-      run: docker login https://gcr.io -u _json_key -p "${GCR_BITNAMI_LABS}"
-      env:
-        DOCKER_CONFIG: ${HOME}/.docker/${GITHUB_RUN_ID}
-        GCR_BITNAMI_LABS: ${{ secrets.GCR_BITNAMI_LABS }}
-    - name: Publish containers
-      uses: docker://l.gcr.io/google/bazel:2.2.0
-      with:
-        entrypoint: /bin/bash
-        args: -c "${GITHUB_WORKSPACE}/tools/bazel-docker-push.sh; ${GITHUB_WORKSPACE}/tools/bazel-docker-push-latest.sh"
-      env:
-        DOCKER_CONFIG: ${HOME}/.docker/${GITHUB_RUN_ID}
