@@ -27,6 +27,8 @@ const (
 )
 
 var (
+	gitCommit = "UNKNOWN"
+
 	inputFile  = flag.String("input", "plugins.json", "input file (.json, .jsonnet. .yaml or .yml)")
 	warFile    = flag.String("war", "", "jenkins war file")
 	optional   = flag.Bool("optional", false, "add optional dependencies to the output. It will allow plugins to run with all the expected features.")
@@ -195,6 +197,8 @@ func validateFlags() error {
 
 func main() {
 	flag.Parse()
+
+	log.Printf("Version commit: %s\n", gitCommit)
 	if err := run(); err != nil {
 		log.Fatalf("%+v", err)
 	}

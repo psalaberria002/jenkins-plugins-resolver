@@ -1,16 +1,16 @@
 # github.com/ghodss/yaml v1.0.0
 github.com/ghodss/yaml
 # github.com/golang/protobuf v1.3.2
-github.com/golang/protobuf/proto
 github.com/golang/protobuf/jsonpb
+github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/struct
 # github.com/google/go-jsonnet v0.14.0
 github.com/google/go-jsonnet
 github.com/google/go-jsonnet/ast
 github.com/google/go-jsonnet/astgen
 github.com/google/go-jsonnet/internal/errors
-github.com/google/go-jsonnet/internal/program
 github.com/google/go-jsonnet/internal/parser
+github.com/google/go-jsonnet/internal/program
 # github.com/hashicorp/go-version v1.2.0
 github.com/hashicorp/go-version
 # github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d

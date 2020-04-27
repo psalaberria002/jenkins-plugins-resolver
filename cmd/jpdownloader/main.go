@@ -22,6 +22,8 @@ const (
 )
 
 var (
+	gitCommit = "UNKNOWN"
+
 	workingDir = flag.String("working-dir", filepath.Join(os.Getenv("HOME"), ".jpr"), "plugins working directory, default to the HOME/.jenkins directory")
 	outputDir  = flag.String("output-dir", filepath.Join(os.Getenv("JENKINS_HOME"), "plugins"), "output directory, default to the JENKINS_HOME/plugins directory")
 	inputFile  = flag.String("input", "plugins.json.lock", "input file. You can use the output of jpresolver")
@@ -101,6 +103,8 @@ func validateFlags() error {
 
 func main() {
 	flag.Parse()
+
+	log.Printf("Version commit: %s\n", gitCommit)
 	if err := run(); err != nil {
 		log.Fatalf("%+v", err)
 	}
