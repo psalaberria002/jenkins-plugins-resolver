@@ -9,16 +9,28 @@ jobs:
   check:
     name: Check Integration
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
+
+    # Caches and restores the bazel build directory.
+    - name: Cache bazel build results
+      uses: actions/cache@v2.0.0
+      env:
+        cache-name: bazel-cache
+      with:
+        path: ~/.cache/bazel
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.ref }}
+        restore-keys: |
+          ${{ runner.os }}-${{ env.cache-name }}-master
+
     - name: Build targets
-      uses: docker://l.gcr.io/google/bazel:4.0.0
       with:
         entrypoint: /bin/bash
         args: bazel build //...
+
     - name: Test targets
-      uses: docker://l.gcr.io/google/bazel:4.0.0
       with:
         entrypoint: /bin/bash
         args: bazel test //...
