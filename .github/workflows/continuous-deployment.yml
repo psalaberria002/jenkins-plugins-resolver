@@ -28,9 +28,7 @@ jobs:
           ${{ runner.os }}-${{ env.cache-name }}-master
 
     - name: Publish containers
-      with:
-        entrypoint: /bin/bash
-        args: -c "tools/publish.sh"
+      run: /bin/bash -c "tools/publish.sh"
       env:
         GCR_BITNAMI_LABS: ${{ secrets.GCR_BITNAMI_LABS }}
 

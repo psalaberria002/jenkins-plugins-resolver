@@ -26,11 +26,7 @@ jobs:
           ${{ runner.os }}-${{ env.cache-name }}-master
 
     - name: Build targets
-      with:
-        entrypoint: /bin/bash
-        args: bazel build //...
+      run: bazel build //...
 
     - name: Test targets
-      with:
-        entrypoint: /bin/bash
-        args: bazel test //...
+      run: bazel test //...
