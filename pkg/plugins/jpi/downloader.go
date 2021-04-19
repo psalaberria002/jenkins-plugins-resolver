@@ -44,6 +44,7 @@ func FetchPlugin(p *api.Plugin, d common.Downloader, workingDir string) error {
 	defer w.Close()
 
 	if err := d.Download(ctx, p, w); err != nil {
+		defer func() { os.Remove(pluginPath) }()
 		return errors.Annotatef(err, "unable to download %q", d.GetDownloadURL(p))
 	}
 
