@@ -1,7 +1,6 @@
 package jpi
 
 import (
-	"bytes"
 	"context"
 	"log"
 	"time"
@@ -36,12 +35,17 @@ func FetchPlugin(p *api.Plugin, d common.Downloader, workingDir string) error {
 
 	log.Printf("> downloading %s plugin...\n", p.Identifier())
 
-	var b bytes.Buffer
-	if err := d.Download(ctx, p, &b); err != nil {
+	t, err := renameio.TempFile("", pluginPath)
+	if err != nil {
+		return err
+	}
+	defer t.Cleanup()
+
+	if err := d.Download(ctx, p, t); err != nil {
 		return errors.Annotatef(err, "unable to download %q", d.GetDownloadURL(p))
 	}
 
-	return renameio.WriteFile(pluginPath, b.Bytes(), 0644)
+	return t.CloseAtomicallyReplace()
 }
 
 func worker(id int, jobs <-chan *downloadRequest, results chan<- error) {
