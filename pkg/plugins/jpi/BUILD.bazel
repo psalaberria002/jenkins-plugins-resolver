@@ -13,6 +13,7 @@ go_library(
         "//api:go_default_library",
         "//pkg/plugins/downloader/common:go_default_library",
         "//pkg/utils:go_default_library",
+        "//vendor/github.com/google/renameio:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",
         "//vendor/github.com/mkmik/multierror:go_default_library",
     ],
@@ -30,6 +31,7 @@ go_test(
         "//api:go_default_library",
         "//pkg/plugins/common:go_default_library",
         "//pkg/plugins/downloader/testdownloader:go_default_library",
+        "//pkg/utils:go_default_library",
         "//vendor/github.com/golang/protobuf/proto:go_default_library",
     ],
 )
