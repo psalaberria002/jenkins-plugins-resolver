@@ -5,6 +5,9 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/bitnami-labs/jenkins-plugins-resolver/cmd/jpresolver",
     visibility = ["//visibility:public"],
+    x_defs = {
+        "gitCommit": "{STABLE_GIT_COMMIT}",
+    },
     deps = [
         "//api:go_default_library",
         "//pkg/plugins/common:go_default_library",
@@ -18,9 +21,6 @@ go_library(
         "//vendor/github.com/juju/errors:go_default_library",
         "//vendor/github.com/mkmik/multierror:go_default_library",
     ],
-    x_defs = {
-        "gitCommit": "{STABLE_GIT_COMMIT}",
-    },
 )
 
 go_binary(
