@@ -6,6 +6,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-jsonnet v0.14.0
+	github.com/google/renameio v1.0.0
 	github.com/hashicorp/go-version v1.2.0
 	github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect

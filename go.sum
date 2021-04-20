@@ -7,6 +7,8 @@ github.com/golang/protobuf v1.3.2 h1:6nsPYzhq5kReh6QImI3k5qWzO4PEbvbIW2cwSfR/6xs
 github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/google/go-jsonnet v0.14.0 h1:as/sAfmjOHqY/OMBR4mv9I8ZY0/jNuqN3u44AicwxPs=
 github.com/google/go-jsonnet v0.14.0/go.mod h1:zPGC9lj/TbjkBtUACIvYR/ILHrFqKRhxeEA+bLyeMnY=
+github.com/google/renameio v1.0.0 h1:xhp2CnJmgQmpJU4RY8chagahUq5mbPPAbiSQstKpVMA=
+github.com/google/renameio v1.0.0/go.mod h1:t/HQoYBZSsWSNK35C6CO/TpPLDVWvxOHboWUAweKUpk=
 github.com/hashicorp/go-version v1.2.0 h1:3vNe/fWF5CBgRIguda1meWhsZHy3m8gCJ5wx+dIzX/E=
 github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d h1:hJXjZMxj0SWlMoQkzeZDLi2cmeiWKa7y1B8Rg+qaoEc=

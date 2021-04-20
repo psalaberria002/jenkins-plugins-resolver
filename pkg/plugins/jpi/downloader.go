@@ -1,14 +1,15 @@
 package jpi
 
 import (
+	"bytes"
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"github.com/bitnami-labs/jenkins-plugins-resolver/api"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/plugins/downloader/common"
 	"github.com/bitnami-labs/jenkins-plugins-resolver/pkg/utils"
+	"github.com/google/renameio"
 	"github.com/juju/errors"
 	"github.com/mkmik/multierror"
 )
@@ -27,27 +28,20 @@ func FetchPlugin(p *api.Plugin, d common.Downloader, workingDir string) error {
 	defer cancel()
 
 	pluginPath := GetPluginPath(p, workingDir)
-	cached, err := utils.FileExists(pluginPath)
-	if err != nil {
+	if cached, err := utils.FileExists(pluginPath); err != nil {
 		return errors.Trace(err)
-	}
-
-	if cached {
+	} else if cached {
 		return nil
 	}
+
 	log.Printf("> downloading %s plugin...\n", p.Identifier())
 
-	w, err := os.Create(pluginPath)
-	if err != nil {
-		return errors.Trace(err)
-	}
-	defer w.Close()
-
-	if err := d.Download(ctx, p, w); err != nil {
+	var b bytes.Buffer
+	if err := d.Download(ctx, p, &b); err != nil {
 		return errors.Annotatef(err, "unable to download %q", d.GetDownloadURL(p))
 	}
 
-	return nil
+	return renameio.WriteFile(pluginPath, b.Bytes(), 0644)
 }
 
 func worker(id int, jobs <-chan *downloadRequest, results chan<- error) {
