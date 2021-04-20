@@ -1,4 +1,4 @@
-![](https://github.com/bitnami-labs/jenkins-plugins-resolver/workflows/Continuous%20Deployment/badge.svg)
+[![Continuous Integration](https://github.com/bitnami-labs/jenkins-plugins-resolver/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/bitnami-labs/jenkins-plugins-resolver/actions/workflows/continuous-integration.yml)
 
 # Jenkins Plugins Resolver
 
