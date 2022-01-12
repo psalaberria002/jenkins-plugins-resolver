@@ -157,8 +157,8 @@ var exceptionExpressions []*exceptionExpression
 // ExceptionRegexpsRaw are the raw regular expressions that we know are exceptions to standard version formats.
 var ExceptionRegexpsRaw = map[string]versionComparator{
 	// Exception found at https://plugins.jenkins.io/workflow-cps/#releases
-	// Example: 2648.va9433432b33c
-	`([0-9]+)\.v([a-z0-9]+)`: func(i, j []string) (bool, error) {
+	// Example: 2.40 is now 2648.va9433432b33c
+	`([0-9]+)\.v?([a-z0-9]+)`: func(i, j []string) (bool, error) {
 		xi, err := strconv.Atoi(i[1])
 		if err != nil {
 			return false, errors.Errorf("malformed version: %s in %v is not an integer", i[1], i)
