@@ -62,7 +62,7 @@ google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
 # gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 ## explicit
-# gopkg.in/yaml.v2 v2.2.7
+# gopkg.in/yaml.v2 v2.2.8
 ## explicit
 gopkg.in/yaml.v2
 # sigs.k8s.io/yaml v1.1.0

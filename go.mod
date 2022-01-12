@@ -12,11 +12,14 @@ require (
 	github.com/mkmik/multierror v0.3.0
 )
 
+// Import this version explicitly to fix CVE-2019-11254
+// See https://github.com/advisories/GHSA-wxc4-f4m6-wwqv
+require gopkg.in/yaml.v2 v2.2.8 // indirect
+
 require (
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
 	github.com/juju/testing v0.0.0-20190723135506-ce30eb24acd2 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
-	gopkg.in/yaml.v2 v2.2.7 // indirect
 	sigs.k8s.io/yaml v1.1.0 // indirect
 )
