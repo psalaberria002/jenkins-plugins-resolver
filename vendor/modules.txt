@@ -1,23 +1,70 @@
 # github.com/ghodss/yaml v1.0.0
+## explicit
 github.com/ghodss/yaml
-# github.com/golang/protobuf v1.3.2
+# github.com/golang/protobuf v1.5.2
+## explicit; go 1.9
 github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/proto
-github.com/golang/protobuf/ptypes/struct
-# github.com/google/go-jsonnet v0.14.0
+# github.com/google/go-jsonnet v0.18.0
+## explicit; go 1.13
 github.com/google/go-jsonnet
 github.com/google/go-jsonnet/ast
 github.com/google/go-jsonnet/astgen
 github.com/google/go-jsonnet/internal/errors
 github.com/google/go-jsonnet/internal/parser
 github.com/google/go-jsonnet/internal/program
-# github.com/google/renameio v1.0.0
+# github.com/google/renameio v1.0.1
+## explicit; go 1.13
 github.com/google/renameio
-# github.com/hashicorp/go-version v1.2.0
+# github.com/hashicorp/go-version v1.4.0
+## explicit
 github.com/hashicorp/go-version
-# github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d
+# github.com/juju/errors v0.0.0-20210818161939-5560c4c073ff
+## explicit; go 1.15
 github.com/juju/errors
+# github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8
+## explicit
+# github.com/juju/testing v0.0.0-20190723135506-ce30eb24acd2
+## explicit
 # github.com/mkmik/multierror v0.3.0
+## explicit; go 1.12
 github.com/mkmik/multierror
-# gopkg.in/yaml.v2 v2.2.2
+# google.golang.org/protobuf v1.26.0
+## explicit; go 1.9
+google.golang.org/protobuf/encoding/protojson
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/json
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genid
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/order
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protodesc
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
+google.golang.org/protobuf/types/descriptorpb
+# gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
+## explicit
+# gopkg.in/yaml.v2 v2.2.7
+## explicit
 gopkg.in/yaml.v2
+# sigs.k8s.io/yaml v1.1.0
+## explicit
+sigs.k8s.io/yaml
