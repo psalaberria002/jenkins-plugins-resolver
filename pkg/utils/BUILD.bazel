@@ -12,6 +12,7 @@ go_library(
         "//vendor/github.com/google/go-jsonnet:go_default_library",
         "//vendor/github.com/hashicorp/go-version:go_default_library",
         "//vendor/github.com/juju/errors:go_default_library",
+        "//vendor/github.com/mkmik/multierror:go_default_library",
     ],
 )
 
