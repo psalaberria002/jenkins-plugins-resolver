@@ -126,7 +126,7 @@ func VersionLower(i string, j string) (bool, error) {
 func versionLower(i string, j string) (bool, error) {
 	vj, err := version.NewVersion(j)
 	if err != nil {
-		return false, errors.Errorf("unable to parse version (no-semver) %s: %s", j, err)
+		return false, errors.Errorf("unable to parse version %s: %s", j, err)
 	}
 
 	if i == "" && j != "" {
@@ -135,26 +135,26 @@ func versionLower(i string, j string) (bool, error) {
 
 	vi, err := version.NewVersion(i)
 	if err != nil {
-		return false, errors.Errorf("unable to parse version (no-semver) %s: %s", i, err)
+		return false, errors.Errorf("unable to parse version %s: %s", i, err)
 	}
 
 	return vi.LessThan(vj), nil
 }
 
-type VersionComparator func(i, j []string) (bool, error)
+type versionComparator func(i, j []string) (bool, error)
 
 // exceptionExpression contains a compiled regular expression and a function to test whether a version
 // matching it is lower than another vesrion.
 type exceptionExpression struct {
 	re *regexp.Regexp
-	fn VersionComparator
+	fn versionComparator
 }
 
 // The exceptions to manage
 var exceptionExpressions []*exceptionExpression
 
 // ExceptionRegexpsRaw are the raw regular expressions that we know are exceptions to standard version formats.
-var ExceptionRegexpsRaw = map[string]VersionComparator{
+var ExceptionRegexpsRaw = map[string]versionComparator{
 	// Exception found at https://plugins.jenkins.io/workflow-cps/#releases
 	// Example: 2648.va9433432b33c
 	`([0-9]+)\.v([a-z0-9]+)`: func(i, j []string) (bool, error) {
