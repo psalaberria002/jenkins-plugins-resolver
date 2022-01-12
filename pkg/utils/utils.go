@@ -2,6 +2,12 @@ package utils
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strconv"
+
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -9,11 +15,6 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/juju/errors"
 	"github.com/mkmik/multierror"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strconv"
 )
 
 // FileExists will test if a file exists
