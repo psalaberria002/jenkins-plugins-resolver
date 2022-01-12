@@ -2,17 +2,18 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/ghodss/yaml"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
+	"github.com/google/go-jsonnet"
+	"github.com/hashicorp/go-version"
+	"github.com/juju/errors"
+	"github.com/mkmik/multierror"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/ghodss/yaml"
-
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
-	jsonnet "github.com/google/go-jsonnet"
-	version "github.com/hashicorp/go-version"
-	"github.com/juju/errors"
+	"regexp"
+	"strconv"
 )
 
 // FileExists will test if a file exists
@@ -102,9 +103,30 @@ func UnmarshalFile(filename string, pb proto.Message) error {
 
 // VersionLower returns whether i version is lower than j version
 func VersionLower(i string, j string) (bool, error) {
+	var errs error
+
+	lower, err := versionLower(i, j)
+	if err == nil {
+		return lower, nil
+	}
+	errs = multierror.Append(errs, err)
+
+	for _, e := range exceptionExpressions {
+		lower, err = versionLowerException(i, j, e)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			continue
+		}
+		return lower, nil
+	}
+
+	return false, errs
+}
+
+func versionLower(i string, j string) (bool, error) {
 	vj, err := version.NewVersion(j)
 	if err != nil {
-		return false, errors.Errorf("Error parsing version %s: %s", j, err)
+		return false, errors.Errorf("unable to parse version (no-semver) %s: %s", j, err)
 	}
 
 	if i == "" && j != "" {
@@ -113,8 +135,58 @@ func VersionLower(i string, j string) (bool, error) {
 
 	vi, err := version.NewVersion(i)
 	if err != nil {
-		return false, errors.Errorf("Error parsing version %s: %s", i, err)
+		return false, errors.Errorf("unable to parse version (no-semver) %s: %s", i, err)
 	}
 
 	return vi.LessThan(vj), nil
+}
+
+type VersionComparator func(i, j []string) (bool, error)
+
+// exceptionExpression contains a compiled regular expression and a function to test whether a version
+// matching it is lower than another vesrion.
+type exceptionExpression struct {
+	re *regexp.Regexp
+	fn VersionComparator
+}
+
+// The exceptions to manage
+var exceptionExpressions []*exceptionExpression
+
+// ExceptionRegexpsRaw are the raw regular expressions that we know are exceptions to standard version formats.
+var ExceptionRegexpsRaw = map[string]VersionComparator{
+	// Exception found at https://plugins.jenkins.io/workflow-cps/#releases
+	// Example: 2648.va9433432b33c
+	`([0-9]+)\.v([a-z0-9]+)`: func(i, j []string) (bool, error) {
+		xi, err := strconv.Atoi(i[1])
+		if err != nil {
+			return false, errors.Errorf("malformed version: %s in %v is not an integer", i[1], i)
+		}
+		xj, err := strconv.Atoi(j[1])
+		if err != nil {
+			return false, errors.Errorf("malformed version: %s in %v is not an integer", i[1], i)
+		}
+		return xi < xj, nil
+	},
+}
+
+func init() {
+	for raw, fn := range ExceptionRegexpsRaw {
+		re := regexp.MustCompile(raw)
+		exceptionExpressions = append(exceptionExpressions, &exceptionExpression{re: re, fn: fn})
+	}
+}
+
+func versionLowerException(i string, j string, exp *exceptionExpression) (bool, error) {
+	im := exp.re.FindStringSubmatch(i)
+	if im == nil {
+		return false, errors.Errorf("unable to parse version (exception) %s: It does not match %s", i, exp.re.String())
+	}
+
+	ij := exp.re.FindStringSubmatch(j)
+	if ij == nil {
+		return false, errors.Errorf("unable to parse version (exception) %s: It does not match %s", j, exp.re.String())
+	}
+
+	return exp.fn(im, ij)
 }

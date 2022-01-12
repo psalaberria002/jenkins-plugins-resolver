@@ -111,11 +111,15 @@ func TestVersionLower(t *testing.T) {
 		vj   string
 		want bool
 	}{
+		// Test standard versions
 		{"1.0.0", "1.0.0", false},
 		{"1.0.0", "2.0.0", true},
 		{"1.0.0", "1.1.0", true},
 		{"1.0.0", "1.0.1", true},
 		{"1.0.0", "1.0.0.1", true},
+		// Test exceptions
+		{"1108.v57edf648f5d4", "2648.va9433432b33c", true},
+		{"3108.v93ed", "2648.vbc92", false},
 	}
 	for _, tc := range testCases {
 		got, err := VersionLower(tc.vi, tc.vj)
