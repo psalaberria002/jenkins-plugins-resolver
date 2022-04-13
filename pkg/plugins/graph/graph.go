@@ -31,7 +31,7 @@ func ReadGraph(graphPath string) (*api.Graph, error) {
 }
 
 // NewNode will return a graph node for the given plugin
-func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
+func NewNode(p *api.Plugin, workingDir string, optional bool) (*api.Graph_Node, error) {
 	node := api.Graph_Node{
 		Plugin: p,
 	}
@@ -44,7 +44,7 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 		return nil, errors.Trace(err)
 	}
 	for _, dep := range pm.Dependencies {
-		nodeDep, err := NewNode(dep, workingDir)
+		nodeDep, err := NewNode(dep, workingDir, optional)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -52,20 +52,22 @@ func NewNode(p *api.Plugin, workingDir string) (*api.Graph_Node, error) {
 	}
 	node.Dependencies = dependencies
 
-	for _, dep := range pm.OptionalDependencies {
-		nodeDep, err := NewNode(dep, workingDir)
-		if err != nil {
-			return nil, errors.Trace(err)
+	if optional {
+		for _, dep := range pm.OptionalDependencies {
+			nodeDep, err := NewNode(dep, workingDir, optional)
+			if err != nil {
+				return nil, errors.Trace(err)
+			}
+			optionalDependencies = append(optionalDependencies, nodeDep)
 		}
-		optionalDependencies = append(optionalDependencies, nodeDep)
+		node.OptionalDependencies = optionalDependencies
 	}
-	node.OptionalDependencies = optionalDependencies
 
 	return &node, nil
 }
 
 // FetchGraph computes the graph for a list of plugins or read it from the store
-func FetchGraph(plugins []*api.Plugin, d common.Downloader, workingDir string, maxWorkers int) (*api.Graph, error) {
+func FetchGraph(plugins []*api.Plugin, d common.Downloader, workingDir string, maxWorkers int, optional bool) (*api.Graph, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeoutMin*time.Minute)
 	defer cancel()
 
@@ -89,7 +91,7 @@ func FetchGraph(plugins []*api.Plugin, d common.Downloader, workingDir string, m
 	}
 
 	log.Println("Computing graph...")
-	if err := fetch(ctx, plugins, d, workingDir, maxWorkers); err != nil {
+	if err := fetch(ctx, plugins, d, workingDir, maxWorkers, optional); err != nil {
 		return nil, errors.Trace(err)
 	}
 
@@ -97,7 +99,7 @@ func FetchGraph(plugins []*api.Plugin, d common.Downloader, workingDir string, m
 	var errs error
 	var nodes []*api.Graph_Node
 	for _, p := range plugins {
-		node, err := NewNode(p, workingDir)
+		node, err := NewNode(p, workingDir, optional)
 		if err != nil {
 			errs = multierror.Append(errs, errors.Trace(err))
 			continue
@@ -119,7 +121,7 @@ func FetchGraph(plugins []*api.Plugin, d common.Downloader, workingDir string, m
 	return &g, nil
 }
 
-func fetch(ctx context.Context, plugins []*api.Plugin, d common.Downloader, workingDir string, maxWorkers int) error {
+func fetch(ctx context.Context, plugins []*api.Plugin, d common.Downloader, workingDir string, maxWorkers int, optional bool) error {
 	var errs error
 
 	// Iterate the provided list of plugins first to fetch the metadata from upstream
@@ -137,15 +139,17 @@ func fetch(ctx context.Context, plugins []*api.Plugin, d common.Downloader, work
 		}
 
 		// Iterate dependencies
-		if err := fetch(ctx, pm.Dependencies, d, workingDir, maxWorkers); err != nil {
+		if err := fetch(ctx, pm.Dependencies, d, workingDir, maxWorkers, optional); err != nil {
 			errs = multierror.Append(errs, err)
 			continue
 		}
 
-		// Iterate optional dependencies
-		if err := fetch(ctx, pm.OptionalDependencies, d, workingDir, maxWorkers); err != nil {
-			errs = multierror.Append(errs, err)
-			continue
+		if optional {
+			// Iterate optional dependencies
+			if err := fetch(ctx, pm.OptionalDependencies, d, workingDir, maxWorkers, optional); err != nil {
+				errs = multierror.Append(errs, err)
+				continue
+			}
 		}
 	}
 	return errs

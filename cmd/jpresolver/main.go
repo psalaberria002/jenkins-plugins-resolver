@@ -100,7 +100,7 @@ func lockPlugins(requestedPlugins []*api.Plugin, bundledPlugins []*api.Plugin) (
 	}
 
 	downloader := jenkinsdownloader.NewDownloader()
-	g, err := graph.FetchGraph(plugins, downloader, *workingDir, maxWorkers)
+	g, err := graph.FetchGraph(plugins, downloader, *workingDir, maxWorkers, *optional)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
