@@ -130,6 +130,8 @@ func versionLower(i string, j string) (bool, error) {
 		return false, errors.Errorf("unable to parse version %s: %s", j, err)
 	}
 
+	// When comparing bundled plugins to requested plugins,
+	// the bundled plugin version can be empty
 	if i == "" && j != "" {
 		return true, nil
 	}
@@ -179,14 +181,20 @@ func init() {
 }
 
 func versionLowerException(i string, j string, exp *exceptionExpression) (bool, error) {
-	im := exp.re.FindStringSubmatch(i)
-	if im == nil {
-		return false, errors.Errorf("unable to parse version (exception) %s: It does not match %s", i, exp.re.String())
-	}
-
 	ij := exp.re.FindStringSubmatch(j)
 	if ij == nil {
-		return false, errors.Errorf("unable to parse version (exception) %s: It does not match %s", j, exp.re.String())
+		return false, errors.Errorf("unable to parse version (exception) %q: It does not match %s", j, exp.re.String())
+	}
+
+	// When comparing bundled plugins to requested plugins,
+	// the bundled plugin version can be empty
+	if i == "" {
+		return true, nil
+	}
+
+	im := exp.re.FindStringSubmatch(i)
+	if im == nil {
+		return false, errors.Errorf("unable to parse version (exception) %q: It does not match %s", i, exp.re.String())
 	}
 
 	return exp.fn(im, ij)
