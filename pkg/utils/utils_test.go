@@ -149,7 +149,9 @@ func TestVersionLower(t *testing.T) {
 		{"1.0.0", "1.0.0.1", true},
 		// Test exceptions
 		{"", "60.v1747b0eb632a", true},
-		{"1108.v57edf648f5d4", "2648.va9433432b33c", true},
+		{"408.v57edf648f5d4", "1.34", false},
+		{"1.34", "408.v57edf648f5d4", true},
+		{"2.3.4", "2648.va9433432b33c", true},
 		{"3108.v93ed", "2648.vbc92", false},
 		{"3108.v93ed", "1.3108.v93ed", true},
 		{"1.3108.v93ed", "3108.v93ed", false},

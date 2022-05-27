@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -104,7 +103,7 @@ func UnmarshalFile(filename string, pb proto.Message) error {
 }
 
 func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
-	re := regexp.MustCompile(`^([0-9.]+)\.v?[a-z0-9]+$`)
+	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9]+$`)
 	matchi := re.FindStringSubmatch(vi)
 	if matchi == nil {
 		return false, errors.Errorf("unable to parse version %q: It does not match %s", vi, re.String())
@@ -137,7 +136,7 @@ func VersionLower(i string, j string) (bool, error) {
 	errs = multierror.Append(errs, err)
 
 	// compare differently if continuousDeliveryVersioning
-	re := regexp.MustCompile(`^([0-9.]+)\.v?[a-z0-9]+$`)
+	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9]+$`)
 	matchi := re.FindStringSubmatch(i)
 	matchj := re.FindStringSubmatch(j)
 
@@ -147,7 +146,7 @@ func VersionLower(i string, j string) (bool, error) {
 		return continuousDeliveryVersionLower(i, j)
 	} else if matchi != nil {
 		return false, nil
-	} else {
+	} else if matchj != nil {
 		return true, nil
 	}
 
@@ -176,56 +175,5 @@ func versionLower(i string, j string) (bool, error) {
 
 type versionComparator func(i, j []string) (bool, error)
 
-// exceptionExpression contains a compiled regular expression and a function to test whether a version
-// matching it is lower than another vesrion.
-type exceptionExpression struct {
-	re *regexp.Regexp
-	fn versionComparator
-}
-
-// The exceptions to manage
-var exceptionExpressions []*exceptionExpression
-
-// ExceptionRegexpsRaw are the raw regular expressions that we know are exceptions to standard version formats.
-var ExceptionRegexpsRaw = map[string]versionComparator{
-	// Exception found at https://plugins.jenkins.io/workflow-cps/#releases
-	// Example: 2.40 is now 2648.va9433432b33c
-	`([0-9]+)\.v?([a-z0-9]+)`: func(i, j []string) (bool, error) {
-		xi, err := strconv.Atoi(i[1])
-		if err != nil {
-			return false, errors.Errorf("malformed version: %s in %v is not an integer", i[1], i)
-		}
-		xj, err := strconv.Atoi(j[1])
-		if err != nil {
-			return false, errors.Errorf("malformed version: %s in %v is not an integer", i[1], i)
-		}
-		return xi < xj, nil
-	},
-}
-
 func init() {
-	for raw, fn := range ExceptionRegexpsRaw {
-		re := regexp.MustCompile(raw)
-		exceptionExpressions = append(exceptionExpressions, &exceptionExpression{re: re, fn: fn})
-	}
-}
-
-func versionLowerException(i string, j string, exp *exceptionExpression) (bool, error) {
-	ij := exp.re.FindStringSubmatch(j)
-	if ij == nil {
-		return false, errors.Errorf("unable to parse version (exception) %q: It does not match %s", j, exp.re.String())
-	}
-
-	// When comparing bundled plugins to requested plugins,
-	// the bundled plugin version can be empty
-	if i == "" {
-		return true, nil
-	}
-
-	im := exp.re.FindStringSubmatch(i)
-	if im == nil {
-		return false, errors.Errorf("unable to parse version (exception) %q: It does not match %s", i, exp.re.String())
-	}
-
-	return exp.fn(im, ij)
 }
