@@ -117,7 +117,7 @@ func TestContinuousDeliveryVersionLower(t *testing.T) {
 		{"1.3108.v93ed", "3108.v93ed", false},
 		{"4.6.3108.v93ed", "4.7108.v93ed", false},
 		{"4.7108.v93ed", "4.6.3108.v93ed", true},
-		{"5.4.7108.v93ed", "5.4.7107.v93ed", false},
+		{"5.4.7108.v93ed", "5.12.1-187.v577c3e368fb_6", true},
 		{"1.2.2.5.4.7108.v93ed", "1.2.1.5.4.7107.v93ed", false},
 	}
 	for _, tc := range testCases {

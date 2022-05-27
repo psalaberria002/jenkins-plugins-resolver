@@ -102,8 +102,12 @@ func UnmarshalFile(filename string, pb proto.Message) error {
 	return nil
 }
 
+func trimRightIfDashedVersion(v string) string {
+	return strings.Split(v, "-")[0]
+}
+
 func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
-	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9_]+$`)
+	re := regexp.MustCompile(`^([0-9.-]+)\.v[a-z0-9_]+$`)
 	matchi := re.FindStringSubmatch(vi)
 	if matchi == nil {
 		return false, errors.Errorf("unable to parse version %q: It does not match %s", vi, re.String())
@@ -114,10 +118,13 @@ func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
 		return false, errors.Errorf("unable to parse version %q: It does not match %s", vj, re.String())
 	}
 
-	viSplitByDots := strings.Split(matchi[1], ".")
+	finalVersioni := trimRightIfDashedVersion(matchi[1])
+	finalVersionj := trimRightIfDashedVersion(matchj[1])
+
+	viSplitByDots := strings.Split(finalVersioni, ".")
 	vjSplitByDots := strings.Split(matchj[1], ".")
 	if len(viSplitByDots) == len(vjSplitByDots) {
-		return versionLower(matchi[1], matchj[1])
+		return versionLower(finalVersioni, finalVersionj)
 	} else if len(viSplitByDots) < len(vjSplitByDots) {
 		return true, nil
 	} else {
@@ -129,7 +136,7 @@ func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
 func VersionLower(i string, j string) (bool, error) {
 
 	// compare differently if continuousDeliveryVersioning
-	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9_]+$`)
+	re := regexp.MustCompile(`^([0-9.-]+)\.v[a-z0-9_]+$`)
 	matchi := re.FindStringSubmatch(i)
 	matchj := re.FindStringSubmatch(j)
 
