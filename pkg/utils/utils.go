@@ -127,13 +127,6 @@ func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
 
 // VersionLower returns whether i version is lower than j version
 func VersionLower(i string, j string) (bool, error) {
-	var errs error
-
-	lower, err := versionLower(i, j)
-	if err == nil {
-		return lower, nil
-	}
-	errs = multierror.Append(errs, err)
 
 	// compare differently if continuousDeliveryVersioning
 	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9]+$`)
@@ -149,6 +142,15 @@ func VersionLower(i string, j string) (bool, error) {
 	} else if matchj != nil {
 		return true, nil
 	}
+
+	// both versions not matching regex. probably semantic (check aswell?)
+	var errs error
+
+	lower, err := versionLower(i, j)
+	if err == nil {
+		return lower, nil
+	}
+	errs = multierror.Append(errs, err)
 
 	return false, errs
 }
