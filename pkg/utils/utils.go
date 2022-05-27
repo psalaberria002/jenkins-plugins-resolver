@@ -103,7 +103,7 @@ func UnmarshalFile(filename string, pb proto.Message) error {
 }
 
 func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
-	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9]+$`)
+	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9_]+$`)
 	matchi := re.FindStringSubmatch(vi)
 	if matchi == nil {
 		return false, errors.Errorf("unable to parse version %q: It does not match %s", vi, re.String())
@@ -129,7 +129,7 @@ func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
 func VersionLower(i string, j string) (bool, error) {
 
 	// compare differently if continuousDeliveryVersioning
-	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9]+$`)
+	re := regexp.MustCompile(`^([0-9.]+)\.v[a-z0-9_]+$`)
 	matchi := re.FindStringSubmatch(i)
 	matchj := re.FindStringSubmatch(j)
 

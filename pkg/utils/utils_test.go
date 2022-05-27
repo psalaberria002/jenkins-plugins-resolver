@@ -158,7 +158,7 @@ func TestVersionLower(t *testing.T) {
 		{"4.6.3108.v93ed", "4.7108.v93ed", false},
 		{"4.7108.v93ed", "4.6.3108.v93ed", true},
 		{"5.4.7108.v93ed", "5.4.7107.v93ed", false},
-		{"1.2.2.5.4.7108.v93ed", "1.2.1.5.4.7107.v93ed", false},
+		{"1.2.2.5.4.7108.v93ed", "1.2.1.5.4.7107.v_93ed_", false},
 	}
 	for _, tc := range testCases {
 		got, err := VersionLower(tc.vi, tc.vj)
