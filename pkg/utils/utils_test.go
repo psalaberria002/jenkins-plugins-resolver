@@ -105,6 +105,36 @@ func TestMarshalJSON(t *testing.T) {
 	}
 }
 
+func TestContinuousDeliveryVersionLower(t *testing.T) {
+	testCases := []struct {
+		vi   string
+		vj   string
+		want bool
+	}{
+		{"1108.v57edf648f5d4", "2648.va9433432b33c", true},
+		{"3108.v93ed", "2648.vbc92", false},
+		{"3108.v93ed", "1.3108.v93ed", true},
+		{"1.3108.v93ed", "3108.v93ed", false},
+		{"4.6.3108.v93ed", "4.7108.v93ed", false},
+		{"4.7108.v93ed", "4.6.3108.v93ed", true},
+		{"5.4.7108.v93ed", "5.4.7107.v93ed", false},
+		{"1.2.2.5.4.7108.v93ed", "1.2.1.5.4.7107.v93ed", false},
+	}
+	for _, tc := range testCases {
+		got, err := continuousDeliveryVersionLower(tc.vi, tc.vj)
+		if err != nil {
+			t.Fatalf("%+v", err)
+		}
+		msg := "greater"
+		if tc.want {
+			msg = "lower"
+		}
+		if got != tc.want {
+			t.Errorf("%s should be %s than %s but it is not properly detected\n", tc.vi, msg, tc.vj)
+		}
+	}
+}
+
 func TestVersionLower(t *testing.T) {
 	testCases := []struct {
 		vi   string
@@ -121,7 +151,12 @@ func TestVersionLower(t *testing.T) {
 		{"", "60.v1747b0eb632a", true},
 		{"1108.v57edf648f5d4", "2648.va9433432b33c", true},
 		{"3108.v93ed", "2648.vbc92", false},
-		{"3108.v93ed", "2.40", false},
+		{"3108.v93ed", "1.3108.v93ed", true},
+		{"1.3108.v93ed", "3108.v93ed", false},
+		{"4.6.3108.v93ed", "4.7108.v93ed", false},
+		{"4.7108.v93ed", "4.6.3108.v93ed", true},
+		{"5.4.7108.v93ed", "5.4.7107.v93ed", false},
+		{"1.2.2.5.4.7108.v93ed", "1.2.1.5.4.7107.v93ed", false},
 	}
 	for _, tc := range testCases {
 		got, err := VersionLower(tc.vi, tc.vj)

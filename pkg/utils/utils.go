@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/golang/protobuf/jsonpb"
@@ -102,6 +103,29 @@ func UnmarshalFile(filename string, pb proto.Message) error {
 	return nil
 }
 
+func continuousDeliveryVersionLower(vi string, vj string) (bool, error) {
+	re := regexp.MustCompile(`^([0-9.]+)\.v?[a-z0-9]+$`)
+	matchi := re.FindStringSubmatch(vi)
+	if matchi == nil {
+		return false, errors.Errorf("unable to parse version %q: It does not match %s", vi, re.String())
+	}
+
+	matchj := re.FindStringSubmatch(vj)
+	if matchj == nil {
+		return false, errors.Errorf("unable to parse version %q: It does not match %s", vj, re.String())
+	}
+
+	viSplitByDots := strings.Split(matchi[1], ".")
+	vjSplitByDots := strings.Split(matchj[1], ".")
+	if len(viSplitByDots) == len(vjSplitByDots) {
+		return versionLower(matchi[1], matchj[1])
+	} else if len(viSplitByDots) < len(vjSplitByDots) {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
 // VersionLower returns whether i version is lower than j version
 func VersionLower(i string, j string) (bool, error) {
 	var errs error
@@ -112,13 +136,19 @@ func VersionLower(i string, j string) (bool, error) {
 	}
 	errs = multierror.Append(errs, err)
 
-	for _, e := range exceptionExpressions {
-		lower, err = versionLowerException(i, j, e)
-		if err != nil {
-			errs = multierror.Append(errs, err)
-			continue
-		}
-		return lower, nil
+	// compare differently if continuousDeliveryVersioning
+	re := regexp.MustCompile(`^([0-9.]+)\.v?[a-z0-9]+$`)
+	matchi := re.FindStringSubmatch(i)
+	matchj := re.FindStringSubmatch(j)
+
+	// if both use same versioning, compare.
+	// continuousDeliveryVersioning is always newer than semantic (need prove?)
+	if matchi != nil && matchj != nil {
+		return continuousDeliveryVersionLower(i, j)
+	} else if matchi != nil {
+		return false, nil
+	} else {
+		return true, nil
 	}
 
 	return false, errs
